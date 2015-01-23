@@ -1,0 +1,24 @@
+
+#menu-posts-people .wp-menu-image.dashicons-before:before {
+	content: '\e66c';
+	font-family: 'wppeoplelibrary';
+}
+
+#wpmoly-meta-search-metabox.postbox .inside {
+	padding: 0;
+}
+
+#wpmoly-people-metabox:not(.closed) {
+	background: transparent;
+	border: 0;
+	box-shadow: 0 0 0;
+}
+
+#wpmoly-people-metabox:not(.closed) .hndle {
+	display: none;
+}
+
+#wpmoly-people-metabox:not(.closed) .handlediv {
+	position: relative;
+	z-index: 10;
+}
