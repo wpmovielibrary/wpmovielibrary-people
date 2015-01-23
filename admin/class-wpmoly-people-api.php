@@ -71,7 +71,7 @@ if ( class_exists( 'TMDb' ) && ! class_exists( 'WPMOLYP_Api' ) ) :
 		 * Retrieve all cast and crew information for a particular person
 		 *
 		 * @param    int       $id TMDb person-id
-		 * @param    string    $lang Filter the result with a language (ISO 3166-1) other then default, use FALSE to retrieve results from all languages
+		 * @param    string    $lang Filter the result with a language (ISO 3166-1) other than default
 		 * 
 		 * @return   string    TMDb result array
 		 */
@@ -81,7 +81,7 @@ if ( class_exists( 'TMDb' ) && ! class_exists( 'WPMOLYP_Api' ) ) :
 				'language' => $lang
 			);
 
-			return $this->_makeCall( 'person/' . $id . '/credits', $params );
+			return $this->_makeCall( 'person/' . $id . '/movie_credits', $params );
 		}
 
 		/**
@@ -94,6 +94,23 @@ if ( class_exists( 'TMDb' ) && ! class_exists( 'WPMOLYP_Api' ) ) :
 		public function getPersonImages( $id ) {
 
 			return $this->_makeCall( 'person/' . $id . '/images' );
+		}
+
+		/**
+		 * Retrieve all tagged images for a particular person
+		 *
+		 * @param    int       $id TMDb person-id
+		 * @param    string    $lang Filter the result with a language (ISO 3166-1) other than default
+		 * 
+		 * @return             TMDb result array
+		 */
+		public function getPersonTaggedImages( $id, $lang = null ) {
+
+			$params = array(
+				'language' => $lang
+			);
+
+			return $this->_makeCall( 'person/' . $id . '/tagged_images', $params );
 		}
 	}
 

@@ -11,7 +11,7 @@
 
 if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 
-	class WPMOLY_Edit_People extends WPMOLYP_Module {
+	class WPMOLY_Edit_People extends WPMovieLibrary_People_Admin {
 
 		/**
 		 * People Metadata
@@ -46,6 +46,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			global $wpmolyp;
 
 			$this->metadata = $wpmolyp->metadata;
+			$this->api = new WPMOLYP_TMDb();
 		}
 
 		/**
@@ -362,8 +363,14 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 								),
 
 								'images' => array(
+									'title'    => __( 'Portrait', 'wpmovielibrary' ),
+									'icon'     => 'wpmolicon icon-hat',
+									'callback' => 'WPMOLY_Edit_People::render_images_panel'
+								),
+
+								'photos' => array(
 									'title'    => __( 'Images', 'wpmovielibrary' ),
-									'icon'     => 'wpmolicon icon-images-alt',
+									'icon'     => 'wpmolicon icon-images-alt-2',
 									'callback' => 'WPMOLY_Edit_People::render_images_panel'
 								)
 							)
@@ -433,7 +440,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function render_preview_panel( $post_id ) {
 
-			$rating   = wpmoly_get_movie_rating( $post_id );
+			/*$rating   = wpmoly_get_movie_rating( $post_id );
 			$metadata = wpmoly_get_movie_meta( $post_id );
 			$metadata = wpmoly_filter_empty_array( $metadata );
 
@@ -461,8 +468,11 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 				'thumbnail' => get_the_post_thumbnail( $post->ID, 'medium' ),
 				'rating'    => apply_filters( 'wpmoly_movie_rating_stars', $rating, $post->ID, $base = 5 ),
 				'preview'   => $preview
-			);
+			);*/
 
+			$people = self::get_instance()->api->get_people( 10297, 'fr' );
+			$attributes = compact( 'people' );
+			
 			$panel = self::render_admin_template( 'metabox/panels/panel-preview.php', $attributes );
 
 			return $panel;

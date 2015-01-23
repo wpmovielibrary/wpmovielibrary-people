@@ -14,12 +14,17 @@ if ( class_exists( 'WPMOLY_TMDb' ) && ! class_exists( 'WPMOLYP_TMDb' ) ) :
 	/**
 	 * Extends Class for WPML Api Wrapper Class
 	 * 
-	 * Adds a get_people() method to the default WPMovieLibrary Api Wrapper
-	 * for TMDb Api Class.
-	 * 
 	 * @since    1.0
 	 */
-	class WPMOLYP_TMDb extends WPMOLY_TMDb {
+	class WPMOLYP_TMDb {
+
+		/**
+		 * API Instance
+		 *
+		 * @since    1.0
+		 * @var      class
+		 */
+		protected $api = null;
 
 		/**
 		 * Default constructor
@@ -29,63 +34,130 @@ if ( class_exists( 'WPMOLY_TMDb' ) && ! class_exists( 'WPMOLYP_TMDb' ) ) :
 			if ( ! is_admin() )
 				return false;
 
+			$this->api = new WPMOLYP_Api();
+
 		}
 
 		/**
-		 * Get movie's people
+		 * Get all detail about a specific person
 		 * 
 		 * @since    1.0
 		 * 
-		 * @param    int       $id Movie TMDb ID
+		 * @param    int       $id Person TMDb ID
 		 * @param    string    $lang Filter the result with a language
 		 * 
 		 * @return   array     TMDb result
 		 */
-		public static function get_people( $id, $lang = null ) {
+		public function get_people( $id, $lang = null ) {
 
-			$api = new WPMOLYP_Api();
-			$people = $api->getTrailers( $id, $lang );
-			$people = self::filter_data( $people );
+			$person = $this->get_person( $id, $lang );
+			$person['photos'] = $this->get_images( $id );
+			/*$person['images'] = $this->get_photos( $id, $lang );
+			$person['credit'] = $this->get_credits( $id, $lang );*/
 
-			return $people;
+			return $person;
 		}
 
 		/**
-		 * Get movie's videos
+		 * Find a specific person
 		 * 
 		 * @since    1.0
 		 * 
-		 * @param    int       $id Movie TMDb ID
+		 * @param    string    $query Person name or ID
+		 * 
+		 * @return   array     TMDb result
+		 */
+		public function search_person( $query ) {
+
+			$person = $this->api->searchPerson( $query );
+
+			return $person;
+		}
+
+		/**
+		 * Get a person's data
+		 * 
+		 * @since    1.0
+		 * 
+		 * @param    int       $id Person TMDb ID
 		 * @param    string    $lang Filter the result with a language
 		 * 
 		 * @return   array     TMDb result
 		 */
-		public static function get_videos( $id, $lang = null ) {
+		public function get_person( $id, $lang = null ) {
 
-			$api = new WPMOLYP_Api();
-			$videos = $api->getVideos( $id, $lang );
-			$videos = self::filter_data( $videos );
+			$defaults = array_flip( array( 'adult', 'also_known_as', 'biography', 'birthday', 'deathday', 'homepage', 'id', 'imdb_id', 'name', 'place_of_birth' ) );
 
-			return $videos;
+			$person = $this->api->getPerson( $id, $lang );
+			$person = array_intersect_key( $person, $defaults );
+
+			return $person;
 		}
 
-		private static function filter_data( $data ) {
+		/**
+		 * Get a person's credits
+		 * 
+		 * @since    1.0
+		 * 
+		 * @param    int       $id Person TMDb ID
+		 * @param    string    $lang Filter the result with a language
+		 * 
+		 * @return   array     TMDb result
+		 */
+		public function get_credits( $id, $lang = null ) {
 
-			$_data = array();
+			$credits = $this->api->getPersonCredits( $id, $lang );
 
-			if ( ! isset( $data['results'] ) || empty( $data['results'] ) )
-				return $_data;
+			return $credits;
+		}
 
-			foreach ( $data['results'] as $d )
-				$_data[] = array(
-					'id'        => $d['key'],
-					'site'      => 'youtube',
-					'title'     => $d['name'],
-					'thumbnail' => null,
-					'movie_id'  => null
-				);
+		/**
+		 * Get a person's images
+		 * 
+		 * @since    1.0
+		 * 
+		 * @param    int       $id Person TMDb ID
+		 * @param    string    $lang Filter the result with a language
+		 * 
+		 * @return   array     TMDb result
+		 */
+		public function get_images( $id, $lang = null ) {
 
-			return $_data;
+			$defaults = array_flip( array( 'aspect_ratio', 'file_path', 'height', 'width' ) );
+
+			$images = $this->api->getPersonImages( $id, $lang );
+			if ( ! isset( $images['profiles'] ) || empty( $images['profiles'] ) )
+				return array();
+
+			$images = $images['profiles'];
+			foreach ( $images as $i => $image )
+				$images[ $i ] = array_intersect_key( $image, $defaults );
+
+			$images = apply_filters( 'wpmoly_jsonify_movie_images', $images );
+
+			return $images;
+		}
+
+		/**
+		 * Get a person's photos
+		 * 
+		 * @since    1.0
+		 * 
+		 * @param    int       $id Person TMDb ID
+		 * @param    string    $lang Filter the result with a language
+		 * 
+		 * @return   array     TMDb result
+		 */
+		public function get_photos( $id, $lang = null ) {
+
+			$photos = $this->api->getPersonTaggedImages( $id, $lang );
+
+			return $photos;
+		}
+
+		private function filter_data( $data ) {
+
+			return $data;
 		}
 
 	}

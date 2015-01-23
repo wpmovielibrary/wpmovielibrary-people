@@ -42,7 +42,7 @@ if ( ! class_exists( 'WPMovieLibrary_People_Admin' ) ) :
 		 *
 		 * @since    1.0
 		 */
-		protected function __construct() {
+		public function __construct() {
 
 			if ( ! is_admin() )
 				return false;
@@ -59,7 +59,8 @@ if ( ! class_exists( 'WPMovieLibrary_People_Admin' ) ) :
 		public function init() {
 
 			$this->modules = array(
-				'WPMOLY_Edit_People' => WPMOLY_Edit_People::get_instance()
+				//'WPMOLYP_TMDb'       => WPMOLYP_TMDb::get_instance(),
+				'WPMOLY_Edit_People' => WPMOLY_Edit_People::get_instance(),
 			);
 
 			/*$this->screen_hooks = array(

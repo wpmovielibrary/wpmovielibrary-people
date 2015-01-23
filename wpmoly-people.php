@@ -122,9 +122,9 @@ if ( wpmolyp_requirements_met() ) {
 	WPMovieLibrary_People::require_wpmoly_first();
 
 	if ( is_admin() ) {
+		require_once( WPMOLYP_PATH . 'admin/class-wpmoly-people-admin.php' );
 		require_once( WPMOLYP_PATH . 'admin/class-wpmoly-people-api.php' );
 		require_once( WPMOLYP_PATH . 'admin/class-wpmoly-people-api-wrapper.php' );
-		require_once( WPMOLYP_PATH . 'admin/class-wpmoly-people-admin.php' );
 		require_once( WPMOLYP_PATH . 'admin/class-wpmoly-edit-people.php' );
 
 		add_action( 'plugins_loaded', array( 'WPMovieLibrary_People_Admin', 'get_instance' ) );
