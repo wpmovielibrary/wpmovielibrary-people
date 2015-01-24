@@ -82,7 +82,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		/**
 		 * Enqueue required media scripts and styles
 		 * 
-		 * @since    2.0
+		 * @since    1.0
 		 * 
 		 * @param    string    $hook_suffix The current admin page.
 		 */
@@ -104,7 +104,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		/**
 		 * Enqueue required media scripts and styles
 		 * 
-		 * @since    2.0
+		 * @since    1.0
 		 * 
 		 * @param    string    $hook_suffix The current admin page.
 		 */
@@ -117,19 +117,24 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			wp_enqueue_script( WPMOLYP_SLUG . '-people-editor-views-js', WPMOLYP_URL . '/assets/js/admin/wpmoly-people-editor-views.js', array( 'jquery' ), WPMOLYP_VERSION, true );
 		}
 
+		/**
+		 * Add Backbone Templates to footer.
+		 * 
+		 * @since    1.0
+		 */
 		public static function footer_scripts() {
 
 ?>
 		<script type="text/template" id="wpmoly-filmography-cast-template">
 								<% _.each( movies, function( movie ) { %>
 									<div>
-										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][tmdb_id]" value="<%= movie.id %>" /><span><%= movie.id %></span> - 
-										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][title]" value="<%= movie.title %>" /><span><%= movie.title %></span> - 
-										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][original_title]" value="<%= movie.original_title %>" /><span><%= movie.original_title %></span> - 
-										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][character]" value="<%= movie.character %>" /><span><%= movie.character %></span> - 
-										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][job]" value="<%= movie.job %>" /><span><%= movie.job %></span> - 
-										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][poster_path]" value="<%= movie.poster_path %>" /><span><%= movie.poster_path %></span> - 
-										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][release_date]" value="<%= movie.release_date %>" /><span><%= movie.release_date %></span>
+										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][tmdb_id]" value="<%= movie.id %>" /><span><%= movie.id %></span> - 
+										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][title]" value="<%= movie.title %>" /><span><%= movie.title %></span> - 
+										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][original_title]" value="<%= movie.original_title %>" /><span><%= movie.original_title %></span> - 
+										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][character]" value="<%= movie.character %>" /><span><%= movie.character %></span> - 
+										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][job]" value="<%= movie.job %>" /><span><%= movie.job %></span> - 
+										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][poster_path]" value="<%= movie.poster_path %>" /><span><%= movie.poster_path %></span> - 
+										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][release_date]" value="<%= movie.release_date %>" /><span><%= movie.release_date %></span>
 									</div>
 
 								<% }); %>
@@ -480,9 +485,6 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			if ( ! $post || 'person' != get_post_type( $post ) )
 				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a person.', 'wpmovielibrary-people' ) );
 
-			if ( isset( $meta['credits'] ) )
-				$this->save_person_filmography( $post_id, $meta['credits'] );
-
 			$meta = $this->validate_meta( $meta );
 			foreach ( $meta as $slug => $meta )
 				$update = update_post_meta( $post_id, "_wpmoly_person_{$slug}", $meta );
@@ -594,6 +596,12 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 				return $post_id;
 
 			print_r( $_POST['wpmoly'] ); die();
+
+			if ( isset( $_POST['wpmoly']['credits'] ) ) {
+				$credits = $_POST['wpmoly']['credits'];
+				$this->save_person_filmography( $post_id, $credits );
+			}
+
 			if ( isset( $_POST['wpmoly']['meta'] ) ) {
 				$meta = $_POST['wpmoly']['meta'];
 				$this->save_person_meta( $post_id, $meta );
