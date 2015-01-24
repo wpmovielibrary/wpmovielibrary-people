@@ -56,7 +56,8 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		public function register_hook_callbacks() {
 
-			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 9 );
+			add_action( 'admin_enqueue_scripts', array( $this, 'pre_admin_enqueue_scripts' ), 9 );
+			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 15 );
 
 			// Bulk/quick edit
 			add_filter( 'bulk_post_updated_messages', __CLASS__ . '::people_bulk_updated_messages', 10, 2 );
@@ -109,7 +110,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @param    string    $hook_suffix The current admin page.
 		 */
-		public function admin_enqueue_scripts( $hook_suffix ) {
+		public function pre_admin_enqueue_scripts( $hook_suffix ) {
 
 			if ( ( 'post.php' != $hook_suffix && 'post-new.php' != $hook_suffix ) || 'people' != get_post_type() )
 				return false;
@@ -122,6 +123,22 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			wp_enqueue_script( 'field-select-js', ReduxFramework::$_url . 'inc/fields/select/field_select.min.js', array( 'jquery', 'select2-js' ), WPMOLY_VERSION, true );
 			wp_enqueue_style( 'select2-css', ReduxFramework::$_url . 'assets/js/vendor/select2/select2.css', array(), WPMOLY_VERSION, 'all' );
 			wp_enqueue_style( 'redux-field-select-css', ReduxFramework::$_url . 'inc/fields/select/field_select.css', WPMOLY_VERSION, true );
+		}
+
+		/**
+		 * Enqueue required media scripts and styles
+		 * 
+		 * @since    2.0
+		 * 
+		 * @param    string    $hook_suffix The current admin page.
+		 */
+		public function admin_enqueue_scripts( $hook_suffix ) {
+
+			if ( ( 'post.php' != $hook_suffix && 'post-new.php' != $hook_suffix ) || 'people' != get_post_type() )
+				return false;
+
+			wp_enqueue_script( WPMOLYP_SLUG . '-people-editor-models-js', WPMOLYP_URL . '/assets/js/admin/wpmoly-people-editor-models.js', array( 'jquery' ), WPMOLYP_VERSION, true );
+			wp_enqueue_script( WPMOLYP_SLUG . '-people-editor-views-js', WPMOLYP_URL . '/assets/js/admin/wpmoly-people-editor-views.js', array( 'jquery' ), WPMOLYP_VERSION, true );
 		}
 
 		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -356,10 +373,10 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 									'callback' => 'WPMOLY_Edit_People::render_meta_panel'
 								),
 
-								'details' => array(
-									'title'    => __( 'Details', 'wpmovielibrary' ),
-									'icon'     => 'wpmolicon icon-details',
-									'callback' => 'WPMOLY_Edit_People::render_details_panel'
+								'filmography' => array(
+									'title'    => __( 'Filmography', 'wpmovielibrary' ),
+									'icon'     => 'wpmolicon icon-list',
+									'callback' => 'WPMOLY_Edit_People::render_filmography_panel'
 								),
 
 								'images' => array(
@@ -408,6 +425,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 					continue;
 
 				$is_active = ( ( 'preview' == $id && ! $empty ) || ( 'meta' == $id && $empty ) );
+				//$is_active = ( 'meta' == $id );
 				$tabs[ $id ] = array(
 					'title'  => $panel['title'],
 					'icon'   => $panel['icon'],
@@ -468,10 +486,25 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 				'thumbnail' => get_the_post_thumbnail( $post->ID, 'medium' ),
 				'rating'    => apply_filters( 'wpmoly_movie_rating_stars', $rating, $post->ID, $base = 5 ),
 				'preview'   => $preview
-			);*/
+			);
 
-			$people = self::get_instance()->api->get_people( 10297, 'fr' );
-			$attributes = compact( 'people' );
+			$people = self::get_instance()->api->get_people( 10297, 'fr' );*/
+
+			// TODO: filter default thumbnail
+			$thumbnail = get_the_post_thumbnail( $post_id, 'medium' );
+			if ( '' == $thumbnail )
+				$thumbnail = '<img src="https://image.tmdb.org/t/p/w185/jdRmHrG0TWXGhs4tO6TJNSoL25T.jpg" alt="" />';
+				//$thumbnail = '<img src="' . WPMOLYP_URL . '/assets/img/no-profile.jpg" alt="" />';
+
+			$preview = array(
+				'name'       => 'Matthew McConaughey',
+				'age'        => '45',
+				'jobs'       => 'Actor, Producer',
+				'birthplace' => 'Uvalde - Texas - USA',
+				'biography'  => 'Matthew David McConaughey (born November 4, 1969) is an American actor. After a series of minor roles in the early 1990s, McConaughey gained notice for his breakout role in Dazed and Confused (1993). It was in this role that he first conceived the idea of his catch-phrase "Well alright, alright." He then appeared in films such as A Time to Kill, Contact, U-571, Tiptoes, Sahara, and We Are Marshall. McConaughey is best known more recently for his performances as a leading man in the romantic comedies The Wedding Planner, How to Lose a Guy in 10 Days, Failure to Launch, Ghosts of Girlfriends Past and Fool\'s Gold.<br />Description above from the Wikipedia article Matthew McConaughey, licensed under CC-BY-SA, full list of contributors on Wikipedia.'
+			);
+
+			$attributes = compact( 'thumbnail', 'preview' );
 			
 			$panel = self::render_admin_template( 'metabox/panels/panel-preview.php', $attributes );
 
@@ -510,48 +543,19 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		}
 
 		/**
-		 * Movie Metabox Details Panel.
+		 * People Metabox Filmography Panel.
 		 * 
-		 * Display a Metabox panel to edit movie details.
-		 * 
-		 * @since    2.0
+		 * @since    1.0
 		 * 
 		 * @param    int    Current Post ID
 		 * 
 		 * @return   string    Panel HTML Markup
 		 */
-		private static function render_details_panel( $post_id ) {
+		private static function render_filmography_panel( $post_id ) {
 
-			$details = WPMOLY_Settings::get_supported_movie_details();
-			$class   = new ReduxFramework();
+			$attributes = array();
 
-			foreach ( $details as $slug => $detail ) {
-
-				if ( 'custom' == $detail['panel'] ) {
-					unset( $details[ $slug ] );
-					continue;
-				}
-
-				$field_name = $detail['type'];
-				$class_name = "ReduxFramework_{$field_name}";
-				$value      = call_user_func_array( 'wpmoly_get_movie_meta', array( 'post_id' => $post_id, 'meta' => $slug ) );
-
-				if ( ! class_exists( $class_name ) )
-					require_once WPMOLY_PATH . "includes/framework/redux/ReduxCore/inc/fields/{$field_name}/field_{$field_name}.php";
-
-				$field = new $class_name( $detail, $value, $class );
-
-				ob_start();
-				$field->render();
-				$html = ob_get_contents();
-				ob_end_clean();
-
-				$details[ $slug ]['html'] = $html;
-			}
-
-			$attributes = array( 'details' => $details );
-
-			$panel = self::render_admin_template( 'metabox/panels/panel-details.php', $attributes );
+			$panel = self::render_admin_template( 'metabox/panels/panel-filmography.php', $attributes );
 
 			return $panel;
 		}

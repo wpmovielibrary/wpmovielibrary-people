@@ -17,10 +17,10 @@
 <?php endforeach; ?>
 								</select>
 								<input id="wpmoly-search-query" type="text" name="wpmoly[tmdb_query]" value="" size="30" maxlength="32" placeholder="<?php _e( 'ex: The Secret Life of Walter Mitty', 'wpmovielibrary' ); ?>" />
-								<a id="wpmoly-search" name="wpmoly[tmdb_search]" title="<?php _e( 'Search', 'wpmovielibrary' ); ?>" href="<?php echo get_edit_post_link() ?>&amp;wpmoly_auto_fetch=1" class="button button-secondary button-icon"><span class="wpmolicon icon-search"></span></a>
-								<a id="wpmoly-update" name="wpmoly[tmdb_update]" title="<?php _e( 'Update', 'wpmovielibrary' ); ?>" href="<?php echo get_edit_post_link() ?>&amp;wpmoly_auto_fetch=1" class="button button-secondary button-icon"><span class="wpmolicon icon-update"></span></a>
+								<a id="wpmoly-search" name="wpmoly[tmdb_search]" title="<?php _e( 'Search', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-icon"><span class="wpmolicon icon-search"></span></a>
+								<a id="wpmoly-update" name="wpmoly[tmdb_update]" title="<?php _e( 'Update', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-icon"><span class="wpmolicon icon-update"></span></a>
 								<span id="wpmoly-meta-search-spinner"><span class="spinner"></span></span>
-								<a id="wpmoly-empty" name="wpmoly[tmdb_empty]" title="<?php _e( 'Empty Results', 'wpmovielibrary' ); ?>" href="<?php echo get_edit_post_link() ?>&amp;wpmovielibrary-empty-meta=1" class="button button-secondary button-empty button-icon hide-if-no-js"><span class="wpmolicon icon-erase"></span></a>
+								<a id="wpmoly-empty" name="wpmoly[tmdb_empty]" title="<?php _e( 'Empty Results', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-empty button-icon hide-if-no-js"><span class="wpmolicon icon-erase"></span></a>
 							</div>
 
 							<div id="wpmoly_status"></div>

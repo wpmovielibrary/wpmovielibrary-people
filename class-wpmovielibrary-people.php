@@ -63,7 +63,7 @@ if ( ! class_exists( 'WPMovieLibrary_People' ) ) :
 					'size'        => 'half',
 					'rewrite'     => array( 'name' => __( 'name', 'wpmovielibrary' ) )
 				),
-				'also_known_as' => array(
+				'alias' => array(
 					'title'       => __( 'Alias', 'wpmovielibrary' ),
 					'type'        => 'text',
 					'filter'      => 'esc_html',
@@ -79,13 +79,13 @@ if ( ! class_exists( 'WPMovieLibrary_People' ) ) :
 					'size'        => 'half',
 					'rewrite'     => array( 'birthday' => __( 'birthday', 'wpmovielibrary' ) )
 				),
-				'place_of_birth' => array(
+				'birthplace' => array(
 					'title'       => __( 'Place of birth', 'wpmovielibrary' ),
 					'type'        => 'text',
 					'filter'      => 'esc_html',
 					'filter_args' => null,
 					'size'        => 'half',
-					'rewrite'     => array( 'placeofbirth' => __( '', 'wpmovielibrary' ) )
+					'rewrite'     => array( 'birthplace' => __( 'birthplace', 'wpmovielibrary' ) )
 				),
 				'biography' => array(
 					'title'       => __( 'Biography', 'wpmovielibrary' ),
