@@ -62,39 +62,11 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			// Bulk/quick edit
 			add_filter( 'bulk_post_updated_messages', __CLASS__ . '::people_bulk_updated_messages', 10, 2 );
 
-			/*add_action( 'quick_edit_custom_box', __CLASS__ . '::quick_edit_movies', 10, 2 );
-			add_action( 'bulk_edit_custom_box', __CLASS__ . '::bulk_edit_movies', 10, 2 );
-			add_filter( 'post_row_actions', __CLASS__ . '::expand_quick_edit_link', 10, 2 );
-
-			// Post List Table
-			add_filter( 'manage_movie_posts_columns', __CLASS__ . '::movies_columns_head' );
-			add_action( 'manage_movie_posts_custom_column', __CLASS__ . '::movies_columns_content', 10, 2 );
-			add_filter( 'manage_edit-movie_sortable_columns', __CLASS__ . '::movies_sortable_columns', 10, 1 );
-			add_action( 'pre_get_posts', __CLASS__ . '::movies_sortable_columns_order', 10, 1 );
-
-			// Media
-			add_action( 'the_posts', __CLASS__ . '::the_posts_hijack', 10, 2 );
-			add_action( 'ajax_query_attachments_args', __CLASS__ . '::load_images_dummy_query_args', 10, 1 );*/
-
 			// Metabox
 			add_filter( 'wpmoly_filter_metaboxes', array( $this, 'add_meta_box' ), 10 );
 
-			/*if ( 1 == wpmoly_o( 'convert-enable' ) ) {
-				add_action( 'admin_footer-edit.php', __CLASS__ . '::bulk_admin_footer', 10 );
-				add_action( 'load-post.php', __CLASS__ . '::convert_post_type', 10 );
-				add_action( 'load-edit.php', __CLASS__ . '::bulk_convert_post_type', 10 );
-				add_action( 'add_meta_boxes', __CLASS__ . '::add_meta_box', 10 );
-			}*/
-
 			// Post edit
 			add_filter( 'post_updated_messages', __CLASS__ . '::people_updated_messages', 10, 1 );
-			/*add_action( 'save_post_movie', __CLASS__ . '::save_movie', 10, 4 );
-			add_action( 'wp_insert_post_empty_content', __CLASS__ . '::filter_empty_content', 10, 2 );
-			add_action( 'wp_insert_post_data', __CLASS__ . '::filter_empty_title', 10, 2 );
-
-			// Callbacks
-			add_action( 'wp_ajax_wpmoly_save_meta', __CLASS__ . '::save_meta_callback' );
-			add_action( 'wp_ajax_wpmoly_empty_meta', __CLASS__ . '::empty_meta_callback' );*/
 		}
 
 		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -222,117 +194,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-		/**
-		 * Add a custom column to Movies WP_List_Table list.
-		 * Insert a simple 'Poster' column to Movies list table to display
-		 * movies' poster set as featured image if available.
-		 * 
-		 * @since    1.0
-		 * 
-		 * @param    array    $defaults Default WP_List_Table header columns
-		 * 
-		 * @return   array    Default columns with new poster column
-		 */
-		public static function movies_columns_head( $defaults ) {
-
-			$title = array_search( 'title', array_keys( $defaults ) );
-			$comments = array_search( 'comments', array_keys( $defaults ) ) - 1;
-
-			$defaults = array_merge(
-				array_slice( $defaults, 0, $title, true ),
-				array( 'wpmoly-poster' => __( 'Poster', 'wpmovielibrary-people' ) ),
-				array_slice( $defaults, $title, $comments, true ),
-				array( 'wpmoly-release_date' => sprintf( '<span class="wpmolicon icon-date" title="%s"></span>', __( 'Year', 'wpmovielibrary-people' ) ) ),
-				array( 'wpmoly-status'       => sprintf( '<span class="wpmolicon icon-status" title="%s"></span>', __( 'Status', 'wpmovielibrary-people' ) ) ),
-				array( 'wpmoly-media'        => sprintf( '<span class="wpmolicon icon-video" title="%s"></span>', __( 'Media', 'wpmovielibrary-people' ) ) ),
-				array( 'wpmoly-rating'       => __( 'Rating', 'wpmovielibrary-people' ) ),
-				array_slice( $defaults, $comments, count( $defaults ), true )
-			);
-
-			unset( $defaults['author'] );
-			return $defaults;
-		}
-
-		/**
-		 * Add a custom column to Movies WP_List_Table list.
-		 * Insert movies' poster set as featured image if available.
-		 * 
-		 * @since    1.0
-		 * 
-		 * @param    string   $column_name The column name
-		 * @param    int      $post_id current movie's post ID
-		 */
-		public static function movies_columns_content( $column_name, $post_id ) {
-
-			/*$_column_name = str_replace( 'wpmoly-', '', $column_name );
-			switch ( $column_name ) {
-				case 'wpmoly-poster':
-					$html = get_the_post_thumbnail( $post_id, 'thumbnail' );
-					break;
-				case 'wpmoly-release_date':
-					$meta = wpmoly_get_movie_meta( $post_id, 'release_date' );
-					$html = apply_filters( 'wpmoly_format_movie_release_date', $meta, 'Y' );
-					break;
-				case 'wpmoly-status':
-					$meta = call_user_func_array( 'wpmoly_get_movie_meta', array( 'post_id' => $post_id, 'meta' => $_column_name ) );
-					$html = apply_filters( 'wpmoly_format_movie_status', $meta, $format = 'html', $icon = true );
-					break;
-				case 'wpmoly-media':
-					$meta = call_user_func_array( 'wpmoly_get_movie_meta', array( 'post_id' => $post_id, 'meta' => $_column_name ) );
-					$html = apply_filters( 'wpmoly_format_movie_media', $meta, $format = 'html', $icon = true );
-					break;
-				case 'wpmoly-rating':
-					$meta = wpmoly_get_movie_rating( $post_id );
-					$html = apply_filters( 'wpmoly_movie_rating_stars', $meta, $post_id, $base = 5 );
-					break;
-				default:
-					$html = '';
-					break;
-			}
-
-			echo $html;*/
-		}
-
-		/**
-		 * Add a custom column to Movies WP_List_Table list.
-		 * Insert movies' poster set as featured image if available.
-		 * 
-		 * @since    2.0
-		 * 
-		 * @param    array    $column_name The column name
-		 * 
-		 * @return   array    $columns Updated the column name
-		 */
-		public static function movies_sortable_columns( $columns ) {
-
-			$columns['wpmoly-release_date'] = 'wpmoly-release_date';
-			$columns['wpmoly-status']       = 'wpmoly-status';
-			$columns['wpmoly-media']        = 'wpmoly-media';
-			$columns['wpmoly-rating']       = 'wpmoly-rating';
-
-			return $columns;
-		}
-
-		/**
-		 * 
-		 * 
-		 * @since    2.0
-		 * 
-		 * @param    object    $wp_query Current WP_Query instance
-		 */
-		public static function movies_sortable_columns_order( $wp_query ) {
-
-			if ( ! is_admin() )
-			    return false;
-
-			/*$orderby = $wp_query->get( 'orderby' );
-			$allowed = array( 'wpmoly-release_date', 'wpmoly-release_date', 'wpmoly-status', 'wpmoly-media', 'wpmoly-rating' );
-			if ( in_array( $orderby, $allowed ) ) {
-				$key = str_replace( 'wpmoly-', '_wpmoly_movie_', $orderby );
-				$wp_query->set( 'meta_key', $key );
-				$wp_query->set( 'orderby', 'meta_value_num' );
-			}*/
-		}
+		
 
 
 		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -458,38 +320,6 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function render_preview_panel( $post_id ) {
 
-			/*$rating   = wpmoly_get_movie_rating( $post_id );
-			$metadata = wpmoly_get_movie_meta( $post_id );
-			$metadata = wpmoly_filter_empty_array( $metadata );
-
-			$preview  = array();
-			$empty    = (bool) ( isset( $metadata['_empty'] ) && 1 == $metadata['_empty'] );
-
-			if ( $empty )
-				$preview = array(
-					'title'          => '<span class="lipsum">Lorem ipsum dolor</span>',
-					'original_title' => '<span class="lipsum">Lorem ipsum dolor sit amet</span>',
-					'genres'         => '<span class="lipsum">Lorem, ipsum, dolor, sit, amet</span>',
-					'release_date'   => '<span class="lipsum">2014</span>',
-					'rating'         => '<span class="lipsum">0-0</span>',
-					'overview'       => '<span class="lipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut mattis fermentum eros, et rhoncus enim cursus vitae. Nullam interdum mi feugiat, tempor turpis ac, viverra lorem. Nunc placerat sapien ut vehicula iaculis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed lacinia augue pharetra orci porta, nec posuere lectus accumsan. Mauris porttitor posuere lacus, sit amet auctor nibh congue eu.</span>',
-					'director'       => '<span class="lipsum">Lorem ipsum</span>',
-					'cast'           => '<span class="lipsum">Lorem, ipsum, dolor, sit, amet, consectetur, adipiscing, elit, mattis, fermentum, eros, rhoncus, cursus, vitae</span>',
-					
-				);
-			else
-				foreach ( $metadata as $slug => $meta )
-					$preview[ $slug ] = call_user_func( 'apply_filters', "wpmoly_format_movie_{$slug}", $meta );
-
-			$attributes = array(
-				'empty'     => $empty,
-				'thumbnail' => get_the_post_thumbnail( $post->ID, 'medium' ),
-				'rating'    => apply_filters( 'wpmoly_movie_rating_stars', $rating, $post->ID, $base = 5 ),
-				'preview'   => $preview
-			);
-
-			$people = self::get_instance()->api->get_people( 10297, 'fr' );*/
-
 			// TODO: filter default thumbnail
 			$thumbnail = get_the_post_thumbnail( $post_id, 'medium' );
 			if ( '' == $thumbnail )
@@ -573,17 +403,15 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function render_images_panel( $post_id ) {
 
-			global $wp_version;
-
-			$attributes = array(
+			/*$attributes = array(
 				'nonce'   => wpmoly_nonce_field( 'upload-movie-image', $referer = false ),
 				'images'  => WPMOLY_Media::get_movie_imported_images(),
 				'version' => ( version_compare( $wp_version, '4.0', '>=' ) ? 4 : 0 )
 			);
 
-			$panel = self::render_admin_template( 'metabox/panels/panel-images.php', $attributes  );
+			$panel = self::render_admin_template( 'metabox/panels/panel-images.php', $attributes  );*/
 
-			return $panel;
+			return $panel = '';
 		}
 
 		/**
@@ -599,16 +427,16 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function render_posters_panel( $post_id ) {
 
-			global $wp_version;
+			/*global $wp_version;
 
 			$attributes = array(
 				'posters' => WPMOLY_Media::get_movie_imported_posters(),
 				'version' => ( version_compare( $wp_version, '4.0', '>=' ) ? 4 : 0 )
 			);
 
-			$panel = self::render_admin_template( 'metabox/panels/panel-posters.php', $attributes  );
+			$panel = self::render_admin_template( 'metabox/panels/panel-posters.php', $attributes  );*/
 
-			return $panel;
+			return $panel = '';
 		}
 
 
@@ -617,37 +445,6 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 *                             Save data
 		 * 
 		 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-		/**
-		 * Save movie details.
-		 * 
-		 * @since    1.0
-		 * 
-		 * @param    int      $post_id ID of the current Post
-		 * @param    array    $details Movie details: media, status, rating
-		 * 
-		 * @return   int|object    WP_Error object is anything went
-		 *                                  wrong, true else
-		 */
-		public static function save_movie_details( $post_id, $details ) {
-
-			$post = get_post( $post_id );
-			if ( ! $post || 'movie' != get_post_type( $post ) )
-				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a movie.', 'wpmovielibrary-people' ) );
-
-			$details    = self::validate_details( $details );
-			$supported  = WPMOLY_Settings::get_supported_movie_details();
-
-			if ( ! is_array( $details ) )
-				return new WP_Error( 'invalid_details', __( 'Error: the submitted movie details are invalid.', 'wpmovielibrary-people' ) );
-
-			foreach ( $details as $slug => $detail )
-				update_post_meta( $post_id, "_wpmoly_movie_{$slug}", $detail );
-
-			WPMOLY_Cache::clean_transient( 'clean', $force = true );
-
-			return $post_id;
-		}
 
 		/**
 		 * Save movie metadata.
@@ -693,7 +490,9 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function validate_meta( $data ) {
 
-			if ( ! is_array( $data ) || empty( $data ) || ! isset( $data['tmdb_id'] ) )
+			return $data;
+
+			/*if ( ! is_array( $data ) || empty( $data ) || ! isset( $data['tmdb_id'] ) )
 				return $data;
 
 			$data = wpmoly_filter_empty_array( $data );
@@ -723,57 +522,11 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 				$movie_meta
 			);
 
-			return $_data;
+			return $_data;*/
 		}
 
 		/**
-		 * Filter the Movie Details submitted when saving a post to
-		 * avoid storing unexpected data to the database.
-		 * 
-		 * @since    2.1
-		 * 
-		 * @param    array    $data The Movie Details to filter
-		 * 
-		 * @return   array    The filtered Details
-		 */
-		private static function validate_details( $data ) {
-
-			if ( ! is_array( $data ) || empty( $data ) )
-				return $data;
-
-			$data = wpmoly_filter_empty_array( $data );
-
-			$supported = WPMOLY_Settings::get_supported_movie_details();
-			$movie_details = array();
-
-			foreach ( $supported as $slug => $detail ) {
-
-				if ( isset( $data[ $slug ] ) ) {
-
-					$_detail = $data[ $slug ];
-					if ( is_array( $_detail ) && 1 == $detail['multi'] ) {
-
-						$_d = array();
-						foreach ( $_detail as $d )
-							if ( in_array( $d, array_keys( $detail['options'] ) ) )
-								$_d[] = $d;
-
-						$movie_details[ $slug ] = $_d;
-					}
-					else if ( in_array( $_detail, array_keys( $detail['options'] ) ) ) {
-						$movie_details[ $slug ] = $_detail;
-					}
-				}
-				else {
-					$movie_details[ $slug ] = null;
-				}
-			}
-
-			return $movie_details;
-		}
-
-		/**
-		 * Remove movie meta and taxonomies.
+		 * Remove person meta.
 		 * 
 		 * @since    1.2
 		 * 
@@ -781,23 +534,15 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   boolean  Always return true
 		 */
-		public static function empty_movie_meta( $post_id ) {
+		public static function empty_person_meta( $post_id ) {
 
-			wp_delete_object_term_relationships( $post_id, array( 'collection', 'genre', 'actor' ) );
-			delete_post_meta( $post_id, '_wpmoly_movie_data' );
+			delete_post_meta( $post_id, '_wpmoly_person_data' );
 
 			return true;
 		}
 
 		/**
 		 * Save TMDb fetched data.
-		 * 
-		 * Uses the 'save_post_movie' action hook to save the movie metadata
-		 * as a postmeta. This method is used in regular post creation as
-		 * well as in movie import. If no $movie_meta is passed, we're 
-		 * most likely creating a new movie, use $_REQUEST to get the data.
-		 * 
-		 * Saves the movie details as well.
 		 *
 		 * @since    1.0
 		 * 
@@ -808,146 +553,18 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   int|WP_Error
 		 */
-		public static function save_movie( $post_ID, $post, $queue = false, $movie_meta = null ) {
+		public static function save_person( $post_ID, $post, $meta = null ) {
 
 			if ( ! current_user_can( 'edit_post', $post_ID ) )
 				return new WP_Error( __( 'You are not allowed to edit posts.', 'wpmovielibrary-people' ) );
 
-			if ( ! $post = get_post( $post_ID ) || 'movie' != get_post_type( $post ) )
-				return new WP_Error( sprintf( __( 'Posts with #%s is invalid or is not a movie.', 'wpmovielibrary-people' ), $post_ID ) );
+			if ( ! $post = get_post( $post_ID ) || 'people' != get_post_type( $post ) )
+				return new WP_Error( sprintf( __( 'Posts with #%s is invalid or is not a person.', 'wpmovielibrary-people' ), $post_ID ) );
 
 			if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE )
 				return $post_ID;
 
-			$errors = new WP_Error();
-
-			if ( ! is_null( $movie_meta ) && count( $movie_meta ) ) {
-
-				// Save TMDb data
-				self::save_movie_meta( $post_ID, $movie_meta );
-
-				// Set poster as featured image
-				if ( wpmoly_o( 'poster-featured' ) && ! $queue ) {
-					$upload = WPMOLY_Media::set_image_as_featured( $movie_meta['poster'], $post_ID, $movie_meta['tmdb_id'], $movie_meta['title'] );
-					if ( is_wp_error( $upload ) )
-						$errors->add( $upload->get_error_code(), $upload->get_error_message() );
-					else
-						update_post_meta( $post_ID, '_thumbnail_id', $upload );
-				}
-
-				// Switch status from import draft to published
-				if ( 'import-draft' == get_post_status( $post_ID ) && ! $queue ) {
-					$update = wp_update_post(
-						array(
-							'ID' => $post_ID,
-							'post_name'   => sanitize_title_with_dashes( $movie_meta['title'] ),
-							'post_status' => 'publish',
-							'post_title'  => $movie_meta['title'],
-							'post_date'   => current_time( 'mysql' )
-						),
-						$wp_error = true
-					);
-					if ( is_wp_error( $update ) )
-						$errors->add( $update->get_error_code(), $update->get_error_message() );
-				}
-
-				// Autofilling Actors
-				if ( wpmoly_o( 'enable-actor' ) && wpmoly_o( 'actor-autocomplete' ) ) {
-					$limit = intval( wpmoly_o( 'actor-limit' ) );
-					$actors = explode( ',', $movie_meta['cast'] );
-					if ( $limit )
-						$actors = array_slice( $actors, 0, $limit );
-					$actors = wp_set_object_terms( $post_ID, $actors, 'actor', false );
-				}
-
-				// Autofilling Genres
-				if ( wpmoly_o( 'enable-genre' ) && wpmoly_o( 'genre-autocomplete' ) ) {
-					$genres = explode( ',', $movie_meta['genres'] );
-					$genres = wp_set_object_terms( $post_ID, $genres, 'genre', false );
-				}
-
-				// Autofilling Collections
-				if ( wpmoly_o( 'enable-collection' ) && wpmoly_o( 'collection-autocomplete' ) ) {
-					$collections = explode( ',', $movie_meta['director'] );
-					$collections = wp_set_object_terms( $post_ID, $collections, 'collection', false );
-				}
-			}
-			else if ( isset( $_REQUEST['meta'] ) && '' != $_REQUEST['meta'] ) {
-
-				self::save_movie_meta( $post_ID, $_POST['meta'] );
-			}
-
-			if ( isset( $_REQUEST['wpmoly_details'] ) && ! is_null( $_REQUEST['wpmoly_details'] ) ) {
-
-				if ( isset( $_REQUEST['is_quickedit'] ) || isset( $_REQUEST['is_bulkedit'] ) )
-					wpmoly_check_admin_referer( 'quickedit-movie-details' );
-
-				$wpmoly_details = $_REQUEST['wpmoly_details'];
-				if ( true === $_REQUEST['is_bulkedit'] ) {
-					foreach ( $_REQUEST['post'] as $post_id ) {
-						self::save_movie_details( $post_id, $wpmoly_details );
-					}
-				} else {
-					self::save_movie_details( $post_ID, $wpmoly_details );
-				}
-			}
-
-			WPMOLY_Cache::clean_transient( 'clean', $force = true );
-
-			return ( ! empty( $errors->errors ) ? $errors : $post_ID );
-		}
-
-		/**
-		 * If a movie's post is considered "empty" and post_title is
-		 * empty, bypass WordPress empty content safety to avoid losing
-		 * imported metadata. 'wp_insert_post_data' filter will later
-		 * update the post_title to the correct movie title.
-		 * 
-		 * @since    2.0
-		 * 
-		 * @param    bool     $maybe_empty Whether the post should be considered "empty".
-		 * @param    array    $postarr     Array of post data.
-		 * 
-		 * @return   boolean
-		 */
-		public static function filter_empty_content( $maybe_empty, $postarr ) {
-
-			if ( ! isset( $postarr['post_type'] ) || 'movie' != $postarr['post_type'] )
-				return $maybe_empty;
-
-			if ( '' == trim( $postarr['post_title'] ) )
-				return false;
-		}
-
-		/**
-		 * Filter slashed post data just before it is inserted into the
-		 * database. If an empty movie title is detected, and metadata
-		 * contains a title, use it for post_title; if no movie title
-		 * can be found, just use (no title) for post_title.
-		 * 
-		 * @since    2.0
-		 * 
-		 * @param    array    $data    An array of slashed post data.
-		 * @param    array    $postarr An array of sanitized, but otherwise unmodified post data.
-		 * 
-		 * @return   array    Updated $data
-		 */
-		public static function filter_empty_title( $data, $postarr ) {
-
-			if ( '' != $data['post_title'] || ! isset( $data['post_type'] ) || 'movie' != $data['post_type'] || in_array( $data['post_status'], array( 'import-queued', 'import-draft' ) ) )
-				return $data;
-
-			$no_title   = __( '(no title)' );
-			$post_title = $no_title;
-			if ( isset( $postarr['meta']['title'] ) && trim( $postarr['meta']['title'] ) )
-				$post_title = $postarr['meta']['title'];
-
-			if ( $post_title != $no_title && ! in_array( $data['post_status'], array( 'draft', 'pending', 'auto-draft' ) ) )
-				$data['post_name'] = sanitize_title( $post_title );
-
-			$data['post_title'] = $post_title;
-
-			return $data;
+			return $post_ID;
 		}
 
 		/**
