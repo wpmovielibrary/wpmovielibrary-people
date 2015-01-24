@@ -114,7 +114,7 @@ if ( ! class_exists( 'WPMovieLibrary_People' ) ) :
 				'homepage' => array(
 					'title'       => __( 'Homepage', 'wpmovielibrary' ),
 					'type'        => 'text',
-					'filter'      => 'esc_html',
+					'filter'      => 'esc_url',
 					'filter_args' => null,
 					'size'        => 'half',
 					'rewrite'     => null

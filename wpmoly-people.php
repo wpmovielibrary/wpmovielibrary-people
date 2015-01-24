@@ -108,6 +108,7 @@ if ( wpmolyp_requirements_met() ) {
 
 	// Core
 	require_once( WPMOLYP_PATH . 'includes/classes/class-module.php' );
+	require_once( WPMOLYP_PATH . 'includes/functions/wpmoly-people-functions.php' );
 	require_once( WPMOLYP_PATH . 'class-wpmovielibrary-people.php' );
 
 	// Public

@@ -136,6 +136,43 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 		}
 
 		/**
+		 * Return various Person Post Meta.
+		 *
+		 * @since    1.0
+		 * 
+		 * @param    int       $post_id Person Post ID
+		 * @param    string    $meta Meta to return
+		 *
+		 * @return   array|string    WPMOLY Person Meta if available, empty string else.
+		 */
+		public static function get_person_meta( $post_id = null, $meta = null ) {
+
+			if ( is_null( $post_id ) )
+				$post_id =  get_the_ID();
+
+			if ( ! $post = get_post( $post_id ) || 'person' != get_post_type( $post_id ) )
+				return false;
+
+			global $wpmolyp;
+
+			if ( in_array( $meta, array( 'meta', 'data' ) ) ) {
+
+				$value = array();
+				foreach ( array_keys( $wpmolyp->metadata ) as $meta )
+					$value[ $meta ] = get_post_meta( $post_id, "_wpmoly_person_{$meta}", true );
+
+				return $value;
+			}
+
+			if ( ! in_array( $meta, array_keys( $wpmolyp->metadata ) ) )
+				return null;
+
+			$value = get_post_meta( $post_id, "_wpmoly_person_{$meta}", true );
+
+			return $value;
+		}
+
+		/**
 		 * Fired when the plugin is activated.
 		 *
 		 * @since    1.0

@@ -45,9 +45,9 @@ foreach ( $metas as $slug => $meta ) :
 								</div>
 								<div class="wpmoly-meta-value">
 <?php if ( 'textarea' == $meta['type'] ) : ?>
-									<textarea id="meta_data_<?php echo $slug; ?>" name="meta[<?php echo $slug; ?>]" class="meta-data-field" rows="6"><?php echo $value ?></textarea>
+									<textarea id="meta_data_<?php echo $slug; ?>" name="wpmoly[meta][<?php echo $slug; ?>]" class="meta-data-field" rows="6"><?php echo $value ?></textarea>
 <?php elseif ( in_array( $meta['type'], array( 'text', 'hidden' ) ) ) : ?>
-									<input type="<?php echo $meta['type']; ?>" id="meta_data_<?php echo $slug; ?>" name="meta[<?php echo $slug; ?>]" class="meta-data-field" value="<?php echo $value ?>" />
+									<input type="<?php echo $meta['type']; ?>" id="meta_data_<?php echo $slug; ?>" name="wpmoly[meta][<?php echo $slug; ?>]" class="meta-data-field" value="<?php echo $value ?>" />
 <?php endif; ?>
 								</div>
 							</div>

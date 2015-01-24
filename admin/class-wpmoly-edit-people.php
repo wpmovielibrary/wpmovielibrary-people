@@ -327,7 +327,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 				//$thumbnail = '<img src="' . WPMOLYP_URL . '/assets/img/no-profile.jpg" alt="" />';
 
 			$preview = array(
-				'name'       => 'Matthew McConaughey',
+				'name'       => wpmoly_get_person_meta( $post_id, 'name' ),
 				'age'        => '45',
 				'jobs'       => 'Actor, Producer',
 				'birthplace' => 'Uvalde - Texas - USA',
@@ -358,8 +358,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 
 			$metas     = $wpmolyp->metadata;
 			$languages = WPMOLY_Settings::get_supported_languages();
-			$metadata  = wpmoly_get_movie_meta( $post_id );
-			$metadata  = wpmoly_filter_empty_array( $metadata );
+			$metadata  = wpmoly_get_person_meta( $post_id, 'meta' );
 
 			$attributes = array(
 				'languages' => $languages,
@@ -456,16 +455,14 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   int|object    WP_Error object is anything went wrong, true else
 		 */
-		public static function save_person_meta( $post_id, $meta, $clean = true ) {
+		public function save_person_meta( $post_id, $meta, $clean = true ) {
 
 			$post = get_post( $post_id );
 			if ( ! $post || 'person' != get_post_type( $post ) )
 				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a person.', 'wpmovielibrary-people' ) );
 
-			$movie_meta = self::validate_meta( $movie_meta );
-			unset( $movie_meta['post_id'] );
-
-			foreach ( $movie_meta as $slug => $meta )
+			$meta = $this->validate_meta( $meta );
+			foreach ( $meta as $slug => $meta )
 				$update = update_post_meta( $post_id, "_wpmoly_person_{$slug}", $meta );
 
 			if ( false !== $clean )
@@ -484,9 +481,17 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   array    The filtered Metadata
 		 */
-		private static function validate_meta( $data ) {
+		private function validate_meta( $data ) {
 
-			
+			$valid = array_keys( $this->metadata );
+
+			foreach ( $data as $slug => $meta ) {
+				if ( in_array( $slug, $valid ) ) {
+					$filter = ( isset( $this->metadata[ $slug ]['filter'] ) && function_exists( $this->metadata[ $slug ]['filter'] ) ? $this->metadata[ $slug ]['filter'] : 'esc_html' );
+					$args   = ( isset( $this->metadata[ $slug ]['filter_args'] ) && ! is_null( $this->metadata[ $slug ]['filter_args'] ) ? $this->metadata[ $slug ]['filter_args'] : null );
+					$data[ $slug ] = call_user_func( $filter, $meta, $args );
+				}
+			}
 
 			return $data;
 		}
@@ -512,27 +517,28 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 *
 		 * @since    1.0
 		 * 
-		 * @param    int        $post_ID ID of the current Post
+		 * @param    int        $post_id ID of the current Post
 		 * @param    object     $post Post Object of the current Post
-		 * @param    boolean    $queue Queued movie?
-		 * @param    array      $movie_meta Movie Metadata to save with the post
 		 * 
 		 * @return   int|WP_Error
 		 */
-		public function save_person( $post_ID, $post, $meta = null ) {
+		public function save_person( $post_id, $post ) {
 
-			if ( ! current_user_can( 'edit_post', $post_ID ) )
+			if ( ! current_user_can( 'edit_post', $post_id ) )
 				return new WP_Error( __( 'You are not allowed to edit posts.', 'wpmovielibrary-people' ) );
 
-			if ( ! $post = get_post( $post_ID ) || 'people' != get_post_type( $post ) )
-				return new WP_Error( sprintf( __( 'Posts with #%s is invalid or is not a person.', 'wpmovielibrary-people' ), $post_ID ) );
+			if ( ! $post = get_post( $post_id ) || 'people' != get_post_type( $post ) )
+				return new WP_Error( sprintf( __( 'Posts with #%s is invalid or is not a person.', 'wpmovielibrary-people' ), $post_id ) );
 
 			if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE )
-				return $post_ID;
+				return $post_id;
 
-			//print_r( $_POST ); die();
+			if ( isset( $_POST['wpmoly']['meta'] ) ) {
+				$meta = $_POST['wpmoly']['meta'];
+				$this->save_person_meta( $post_id, $meta );
+			}
 
-			return $post_ID;
+			return $post_id;
 		}
 
 		/**
