@@ -45,8 +45,9 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 
 			global $wpmolyp;
 
+			$this->wpmolyp  = $wpmolyp;
 			$this->metadata = $wpmolyp->metadata;
-			$this->api = new WPMOLYP_TMDb();
+			$this->api      = new WPMOLYP_TMDb();
 		}
 
 		/**
@@ -68,6 +69,8 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			// Post edit
 			add_filter( 'post_updated_messages', array( $this, 'person_updated_messages' ), 10, 1 );
 			add_action( 'save_post_person', array( $this, 'save_person' ), 10, 3 );
+
+			add_action( 'admin_footer', __CLASS__ . '::footer_scripts' );
 		}
 
 		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -112,6 +115,26 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 
 			wp_enqueue_script( WPMOLYP_SLUG . '-people-editor-models-js', WPMOLYP_URL . '/assets/js/admin/wpmoly-people-editor-models.js', array( 'jquery' ), WPMOLYP_VERSION, true );
 			wp_enqueue_script( WPMOLYP_SLUG . '-people-editor-views-js', WPMOLYP_URL . '/assets/js/admin/wpmoly-people-editor-views.js', array( 'jquery' ), WPMOLYP_VERSION, true );
+		}
+
+		public static function footer_scripts() {
+
+?>
+		<script type="text/template" id="wpmoly-filmography-cast-template">
+								<% _.each( movies, function( movie ) { %>
+									<div>
+										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][tmdb_id]" value="<%= movie.id %>" /><span><%= movie.id %></span> - 
+										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][title]" value="<%= movie.title %>" /><span><%= movie.title %></span> - 
+										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][original_title]" value="<%= movie.original_title %>" /><span><%= movie.original_title %></span> - 
+										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][character]" value="<%= movie.character %>" /><span><%= movie.character %></span> - 
+										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][job]" value="<%= movie.job %>" /><span><%= movie.job %></span> - 
+										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][poster_path]" value="<%= movie.poster_path %>" /><span><%= movie.poster_path %></span> - 
+										<input type="text" name="wpmoly[credits][cast][<%= movie.id %>][release_date]" value="<%= movie.release_date %>" /><span><%= movie.release_date %></span>
+									</div>
+
+								<% }); %>
+		</script>
+<?php
 		}
 
 		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -402,15 +425,14 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function render_images_panel( $post_id ) {
 
-			/*$attributes = array(
+			$attributes = array(
 				'nonce'   => wpmoly_nonce_field( 'upload-movie-image', $referer = false ),
-				'images'  => WPMOLY_Media::get_movie_imported_images(),
-				'version' => ( version_compare( $wp_version, '4.0', '>=' ) ? 4 : 0 )
+				'images'  => array()
 			);
 
-			$panel = self::render_admin_template( 'metabox/panels/panel-images.php', $attributes  );*/
+			$panel = self::render_admin_template( 'metabox/panels/panel-images.php', $attributes  );
 
-			return $panel = '';
+			return $panel;
 		}
 
 		/**
@@ -426,16 +448,13 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function render_posters_panel( $post_id ) {
 
-			/*global $wp_version;
-
 			$attributes = array(
-				'posters' => WPMOLY_Media::get_movie_imported_posters(),
-				'version' => ( version_compare( $wp_version, '4.0', '>=' ) ? 4 : 0 )
+				'posters' => array()
 			);
 
-			$panel = self::render_admin_template( 'metabox/panels/panel-posters.php', $attributes  );*/
+			$panel = self::render_admin_template( 'metabox/panels/panel-posters.php', $attributes  );
 
-			return $panel = '';
+			return $panel;
 		}
 
 
@@ -455,11 +474,14 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   int|object    WP_Error object is anything went wrong, true else
 		 */
-		public function save_person_meta( $post_id, $meta, $clean = true ) {
+		protected function save_person_meta( $post_id, $meta, $clean = true ) {
 
 			$post = get_post( $post_id );
 			if ( ! $post || 'person' != get_post_type( $post ) )
 				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a person.', 'wpmovielibrary-people' ) );
+
+			if ( isset( $meta['credits'] ) )
+				$this->save_person_filmography( $post_id, $meta['credits'] );
 
 			$meta = $this->validate_meta( $meta );
 			foreach ( $meta as $slug => $meta )
@@ -469,6 +491,16 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 				WPMOLY_Cache::clean_transient( 'clean', $force = true );
 
 			return $post_id;
+		}
+
+		protected function save_person_filmography( $post_id, $credits ) {
+
+			$post = get_post( $post_id );
+			if ( ! $post || 'person' != get_post_type( $post ) )
+				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a person.', 'wpmovielibrary-people' ) );
+
+			$credits = $this->validate_credits( $credits );
+			print_r( $credits ); die();
 		}
 
 		/**
@@ -494,6 +526,34 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			}
 
 			return $data;
+		}
+
+		private function validate_credits( $credits ) {
+
+			$defaults = array(
+				'cast' => array(),
+				'crew' => array()
+			);
+			$credits = wp_parse_args( $credits, $defaults );
+
+			$default_cast = array_flip( array( 'adult', 'character', 'credit_id', 'id', 'original_title', 'poster_path', 'release_date', 'title' ) );
+			$default_crew = array_flip( array( 'adult', 'credit_id', 'department', 'id', 'job', 'original_title', 'poster_path', 'release_date', 'title' ) );
+
+			if ( isset( $credits['cast'] ) && ! empty( $credits['cast'] ) ) {
+				foreach ( $credits['cast'] as $i => $credit ) {
+					$_credit = array_intersect_key( $credit, $default_cast );
+					$credits['cast'][ $i ] = array_map( 'esc_html', $_credit );
+				}
+			}
+
+			if ( isset( $credits['crew'] ) && ! empty( $credits['crew'] ) ) {
+				foreach ( $credits['crew'] as $i => $credit ) {
+					$_credit = array_intersect_key( $credit, $default_crew );
+					$credits['crew'][ $i ] = array_map( 'esc_html', $_credit );
+				}
+			}
+
+			return $credits;
 		}
 
 		/**
@@ -533,6 +593,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE )
 				return $post_id;
 
+			print_r( $_POST['wpmoly'] ); die();
 			if ( isset( $_POST['wpmoly']['meta'] ) ) {
 				$meta = $_POST['wpmoly']['meta'];
 				$this->save_person_meta( $post_id, $meta );

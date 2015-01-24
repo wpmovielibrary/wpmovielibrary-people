@@ -14,6 +14,12 @@ window.wpmoly = window.wpmoly || {};
 			model: editor.models.search,
 			target: editor.models.person
 		});
+
+		editor.views.cast = new wpmoly.editor.View.Movies({
+			el: '#wpmoly-filmography-cast-list',
+			tmpl: '#wpmoly-filmography-cast-template',
+			collection: editor.models.cast
+		});
 	};
 
 	/**
@@ -100,6 +106,28 @@ window.wpmoly = window.wpmoly || {};
 			   value = event.currentTarget.value;
 
 			this.model.set( meta, value );
+		}
+	});
+
+	wpmoly.editor.View.Movies = Backbone.View.extend({
+
+		initialize: function( options ) {
+
+			_.extend( this, _.pick( options, 'tmpl' ) );
+
+			this.template = _.template( $( this.tmpl ).html() );
+			this.render();
+
+			_.bindAll( this, 'render' );
+			this.collection.bind( 'change', this.render );
+			this.collection.bind( 'add', this.render );
+			this.collection.bind( 'reset', this.render );
+		},
+
+		render: function() {
+
+			this.$el.html( this.template( { movies: this.collection.toJSON() } ) );
+			return this;
 		}
 	});
 

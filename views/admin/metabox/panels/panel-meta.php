@@ -8,27 +8,24 @@
 							<?php wpmoly_nonce_field( 'save-people-meta' ) ?>
 							<?php wpmoly_nonce_field( 'search-people' ) ?>
 
-							<p><strong><?php _e( 'Find people on TMDb:', 'wpmovielibrary' ); ?></strong></p>
+							<p><strong><?php _e( 'Find people on TMDb:', 'wpmovielibrary-people' ); ?></strong></p>
 
 							<div>
-								<select id="wpmoly-search-lang" name="wpmoly[lang]">
+								<select id="wpmoly-search-lang">
 <?php foreach ( $languages as $code => $lang ) : ?>
 									<option value="<?php echo $code ?>" <?php selected( wpmoly_o( 'api-language' ), $code ); ?>><?php echo $lang ?></option>
 <?php endforeach; ?>
 								</select>
-								<input id="wpmoly-search-query" type="text" name="wpmoly[tmdb_query]" value="" size="30" maxlength="32" placeholder="<?php _e( 'ex: The Secret Life of Walter Mitty', 'wpmovielibrary' ); ?>" />
-								<a id="wpmoly-search" name="wpmoly[tmdb_search]" title="<?php _e( 'Search', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-icon"><span class="wpmolicon icon-search"></span></a>
-								<a id="wpmoly-update" name="wpmoly[tmdb_update]" title="<?php _e( 'Update', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-icon"><span class="wpmolicon icon-update"></span></a>
+								<input id="wpmoly-search-query" type="text" value="" size="30" maxlength="32" placeholder="<?php _e( 'ex: Matthew McConaughey', 'wpmovielibrary' ); ?>" />
+								<a id="wpmoly-search" title="<?php _e( 'Search', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-icon"><span class="wpmolicon icon-search"></span></a>
+								<a id="wpmoly-update" title="<?php _e( 'Update', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-icon"><span class="wpmolicon icon-update"></span></a>
 								<span id="wpmoly-meta-search-spinner"><span class="spinner"></span></span>
-								<a id="wpmoly-empty" name="wpmoly[tmdb_empty]" title="<?php _e( 'Empty Results', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-empty button-icon hide-if-no-js"><span class="wpmolicon icon-erase"></span></a>
+								<a id="wpmoly-empty" title="<?php _e( 'Empty Results', 'wpmovielibrary' ); ?>" href="#" class="button button-secondary button-empty button-icon hide-if-no-js"><span class="wpmolicon icon-erase"></span></a>
 							</div>
 
 							<div id="wpmoly_status"></div>
 
 							<div id="wpmoly-meta-search-results"></div>
-
-							<input type="hidden" id="wpmoly-actor-limit" class="hide-if-js hide-if-no-js" value="<?php echo wpmoly_o( 'actor-limit' ) ?>" />
-							<input type="hidden" id="wpmoly-poster-featured" class="hide-if-js hide-if-no-js" value="<?php echo ( 1 == wpmoly_o( 'poster-featured' ) ? '1' : '0' ) ?>" />
 
 						</div>
 

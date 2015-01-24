@@ -9,6 +9,7 @@ window.wpmoly = window.wpmoly || {};
 
 		editor.models.person = new wpmoly.editor.Model.Person();
 		editor.models.search = new wpmoly.editor.Model.Search();
+		editor.models.cast = new wpmoly.editor.Model.Movies();
 	};
 
 	/**
@@ -113,6 +114,12 @@ window.wpmoly = window.wpmoly || {};
 					if ( undefined != response.meta ) {
 
 						this.set_meta( response.meta );
+
+						if ( undefined != response.credits.cast ) {
+							editor.models.cast.reset();
+							editor.models.cast.add( response.credits.cast );
+						}
+
 						editor.models.status.trigger( 'status:say', wpmoly_lang.done );
 
 						return true;
@@ -193,6 +200,24 @@ window.wpmoly = window.wpmoly || {};
 
 			return data;
 		}
+	});
+
+	wpmoly.editor.Model.Movie = Backbone.Model.extend({
+
+		defaults: {
+			id: '',
+			title: '',
+			original_title: '',
+			character: '',
+			job: '',
+			poster_path: '',
+			release_date: ''
+		},
+	});
+
+	wpmoly.editor.Model.Movies = Backbone.Collection.extend({
+
+		model: wpmoly.editor.Model.Movie
 	});
 
 	/**

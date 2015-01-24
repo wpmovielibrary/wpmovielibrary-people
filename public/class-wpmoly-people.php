@@ -135,6 +135,12 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 			register_post_type( 'person', $args );
 		}
 
+		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+		 *
+		 *                              Methods
+		 * 
+		 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
 		/**
 		 * Return various Person Post Meta.
 		 *

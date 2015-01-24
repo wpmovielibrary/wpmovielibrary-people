@@ -5,7 +5,6 @@
 
 			<?php echo wpmoly_nonce_field( 'upload-movie-image', $referer = false ); ?>
 			<?php echo wpmoly_nonce_field( 'load-movie-images', $referer = false ); ?>
-			<!--<input type="hidden" id="wp-version" value="<?php echo $version ?>" />-->
 
 			<div id="wpmoly-backdrops-preview" class="hide-if-no-js">
 				<textarea id="wpmoly-imported-backdrops-json" style="display:none"><?php echo $data ?></textarea>

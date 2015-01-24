@@ -106,7 +106,7 @@ if ( class_exists( 'WPMOLY_TMDb' ) && ! class_exists( 'WPMOLYP_TMDb' ) ) :
 			$person = $this->get_person( $id, $lang );
 			/*$person['photos'] = $this->get_images( $id );
 			$person['images'] = $this->get_photos( $id, $lang );*/
-			$person['credit'] = $this->get_credits( $id, $lang );
+			$person['credits'] = $this->get_credits( $id, $lang );
 
 			return $person;
 		}
@@ -127,7 +127,7 @@ if ( class_exists( 'WPMOLY_TMDb' ) && ! class_exists( 'WPMOLYP_TMDb' ) ) :
 			if ( 1 == $person['total_results'] && isset( $person['results'][0]['id'] ) ) {
 
 				$id = intval( $person['results'][0]['id'] );
-				return $this->get_person( $id, $lang );
+				return $this->get_people( $id, $lang );
 			}
 
 			return $person;
