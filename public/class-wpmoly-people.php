@@ -96,13 +96,13 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 
 			$labels = array(
 				'name'               => __( 'People', 'wpmovielibrary' ),
-				'singular_name'      => __( 'People', 'wpmovielibrary' ),
+				'singular_name'      => __( 'Person', 'wpmovielibrary' ),
 				'add_new'            => __( 'Add New', 'wpmovielibrary' ),
-				'add_new_item'       => __( 'Add New People', 'wpmovielibrary' ),
-				'edit_item'          => __( 'Edit People', 'wpmovielibrary' ),
-				'new_item'           => __( 'New People', 'wpmovielibrary' ),
+				'add_new_item'       => __( 'Add New Person', 'wpmovielibrary' ),
+				'edit_item'          => __( 'Edit Person', 'wpmovielibrary' ),
+				'new_item'           => __( 'New Person', 'wpmovielibrary' ),
 				'all_items'          => __( 'All People', 'wpmovielibrary' ),
-				'view_item'          => __( 'View People', 'wpmovielibrary' ),
+				'view_item'          => __( 'View Person', 'wpmovielibrary' ),
 				'search_items'       => __( 'Search People', 'wpmovielibrary' ),
 				'not_found'          => __( 'No movies found', 'wpmovielibrary' ),
 				'not_found_in_trash' => __( 'No movies found in Trash', 'wpmovielibrary' ),
@@ -110,9 +110,9 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 				'menu_name'          => __( 'People', 'wpmovielibrary' )
 			);
 
-			$slug = 'people';
+			$slug = 'person';
 			/*if ( '1' == wpmoly_o( 'rewrite-enable' ) ) {
-				$rewrite = wpmoly_o( 'rewrite-people' );
+				$rewrite = wpmoly_o( 'rewrite-person' );
 				if ( '' != $slug )
 					$slug = $rewrite;
 			}*/
@@ -132,7 +132,7 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 				'menu_icon'          => null
 			);
 
-			register_post_type( 'people', $args );
+			register_post_type( 'person', $args );
 		}
 
 		/**

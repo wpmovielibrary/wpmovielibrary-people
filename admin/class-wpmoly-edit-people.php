@@ -60,14 +60,14 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 15 );
 
 			// Bulk/quick edit
-			add_filter( 'bulk_post_updated_messages', array( $this, 'people_bulk_updated_messages' ), 10, 2 );
+			add_filter( 'bulk_post_updated_messages', array( $this, 'person_bulk_updated_messages' ), 10, 2 );
 
 			// Metabox
 			add_filter( 'wpmoly_filter_metaboxes', array( $this, 'add_meta_box' ), 10 );
 
 			// Post edit
-			add_filter( 'post_updated_messages', array( $this, 'people_updated_messages' ), 10, 1 );
-			add_action( 'save_post_people', array( $this, 'save_person' ), 10, 3 );
+			add_filter( 'post_updated_messages', array( $this, 'person_updated_messages' ), 10, 1 );
+			add_action( 'save_post_person', array( $this, 'save_person' ), 10, 3 );
 		}
 
 		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -85,7 +85,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		public function pre_admin_enqueue_scripts( $hook_suffix ) {
 
-			if ( ( 'post.php' != $hook_suffix && 'post-new.php' != $hook_suffix ) || 'people' != get_post_type() )
+			if ( ( 'post.php' != $hook_suffix && 'post-new.php' != $hook_suffix ) || 'person' != get_post_type() )
 				return false;
 
 			wp_enqueue_media();
@@ -107,7 +107,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		public function admin_enqueue_scripts( $hook_suffix ) {
 
-			if ( ( 'post.php' != $hook_suffix && 'post-new.php' != $hook_suffix ) || 'people' != get_post_type() )
+			if ( ( 'post.php' != $hook_suffix && 'post-new.php' != $hook_suffix ) || 'person' != get_post_type() )
 				return false;
 
 			wp_enqueue_script( WPMOLYP_SLUG . '-people-editor-models-js', WPMOLYP_URL . '/assets/js/admin/wpmoly-people-editor-models.js', array( 'jquery' ), WPMOLYP_VERSION, true );
@@ -137,24 +137,23 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   array    Updated Post update messages
 		 */
-		public function people_updated_messages( $messages ) {
+		public function person_updated_messages( $messages ) {
 
 			global $post;
 			$post_ID = $post->ID;
 
 			$new_messages = array(
-				'people' => array(
-					1  => sprintf( __( 'People updated. <a href="%s">View people</a>', 'wpmovielibrary-people' ), esc_url( get_permalink( $post_ID ) ) ),
+				'person' => array(
+					1  => sprintf( __( 'Person updated. <a href="%s">View person</a>', 'wpmovielibrary-people' ), esc_url( get_permalink( $post_ID ) ) ),
 					2  => __( 'Custom field updated.', 'wpmovielibrary-people' ) ,
 					3  => __( 'Custom field deleted.', 'wpmovielibrary-people' ),
-					4  => __( 'People updated.', 'wpmovielibrary-people' ),
-					5  => isset( $_GET['revision'] ) ? sprintf( __( 'People restored to revision from %s', 'wpmovielibrary-people' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
-					6  => sprintf( __( 'People published. <a href="%s">View people</a>', 'wpmovielibrary-people' ), esc_url( get_permalink( $post_ID ) ) ),
-					7  => __( 'People saved.' ),
-					8  => sprintf( __( 'People submitted. <a target="_blank" href="%s">Preview people</a>', 'wpmovielibrary-people' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-					9  => sprintf( __( 'People scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview people</a>', 'wpmovielibrary-people' ), date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
-					10 => sprintf( __( 'People draft updated. <a target="_blank" href="%s">Preview people</a>', 'wpmovielibrary-people' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
-					11 => __( 'Successfully converted to people.', 'wpmovielibrary-people' )
+					4  => __( 'Person updated.', 'wpmovielibrary-people' ),
+					5  => isset( $_GET['revision'] ) ? sprintf( __( 'Person restored to revision from %s', 'wpmovielibrary-people' ), wp_post_revision_title( (int) $_GET['revision'], false ) ) : false,
+					6  => sprintf( __( 'Person published. <a href="%s">View person</a>', 'wpmovielibrary-people' ), esc_url( get_permalink( $post_ID ) ) ),
+					7  => __( 'Person saved.' ),
+					8  => sprintf( __( 'Person submitted. <a target="_blank" href="%s">Preview person</a>', 'wpmovielibrary-people' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
+					9  => sprintf( __( 'Person scheduled for: <strong>%1$s</strong>. <a target="_blank" href="%2$s">Preview people</a>', 'wpmovielibrary-people' ), date_i18n( __( 'M j, Y @ G:i' ), strtotime( $post->post_date ) ), esc_url( get_permalink( $post_ID ) ) ),
+					10 => sprintf( __( 'Person draft updated. <a target="_blank" href="%s">Preview person</a>', 'wpmovielibrary-people' ), esc_url( add_query_arg( 'preview', 'true', get_permalink( $post_ID ) ) ) ),
 				)
 			);
 
@@ -164,7 +163,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		}
 
 		/**
-		 * Add message support for people in Post Editor bulk edit.
+		 * Add message support for person in Post Editor bulk edit.
 		 * 
 		 * @since    2.1.4
 		 * 
@@ -172,15 +171,15 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   array    Updated Post bulk edit messages
 		 */
-		public function people_bulk_updated_messages( $bulk_messages, $bulk_counts ) {
+		public function person_bulk_updated_messages( $bulk_messages, $bulk_counts ) {
 
 			$new_messages = array(
-				'people' => array(
-					'updated'   => _n( '%s people updated.', '%s people updated.', $bulk_counts['updated'], 'wpmovielibrary-people' ),
-					'locked'    => _n( '%s people not updated, somebody is editing it.', '%s people not updated, somebody is editing them.', $bulk_counts['locked'], 'wpmovielibrary-people' ),
-					'deleted'   => _n( '%s people permanently deleted.', '%s people permanently deleted.', $bulk_counts['deleted'], 'wpmovielibrary-people' ),
-					'trashed'   => _n( '%s people moved to the Trash.', '%s people moved to the Trash.', $bulk_counts['trashed'], 'wpmovielibrary-people' ),
-					'untrashed' => _n( '%s people restored from the Trash.', '%s people restored from the Trash.', $bulk_counts['untrashed'], 'wpmovielibrary-people' ),
+				'person' => array(
+					'updated'   => _n( '%s person updated.', '%s people updated.', $bulk_counts['updated'], 'wpmovielibrary-people' ),
+					'locked'    => _n( '%s person not updated, somebody is editing it.', '%s people not updated, somebody is editing them.', $bulk_counts['locked'], 'wpmovielibrary-people' ),
+					'deleted'   => _n( '%s person permanently deleted.', '%s people permanently deleted.', $bulk_counts['deleted'], 'wpmovielibrary-people' ),
+					'trashed'   => _n( '%s person moved to the Trash.', '%s people moved to the Trash.', $bulk_counts['trashed'], 'wpmovielibrary-people' ),
+					'untrashed' => _n( '%s person restored from the Trash.', '%s people restored from the Trash.', $bulk_counts['untrashed'], 'wpmovielibrary-people' ),
 				)
 			);
 
@@ -215,11 +214,11 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		public function add_meta_box( $metaboxes ) {
 
 			$new_metaboxes = array(
-				'people' => array(
+				'person' => array(
 					'wpmoly-people' => array(
 						'title'         => __( 'WordPress Movie Library', 'wpmovielibrary' ),
 						'callback'      => 'WPMOLY_Edit_People::metabox',
-						'screen'        => 'people',
+						'screen'        => 'person',
 						'context'       => 'normal',
 						'priority'      => 'high',
 						'callback_args' => array(
@@ -448,26 +447,26 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 		/**
-		 * Save movie metadata.
+		 * Save person metadata.
 		 * 
 		 * @since    1.3
 		 * 
 		 * @param    int      $post_id ID of the current Post
-		 * @param    array    $details Movie details: media, status, rating
+		 * @param    array    $meta Person meta
 		 * 
 		 * @return   int|object    WP_Error object is anything went wrong, true else
 		 */
-		public static function save_movie_meta( $post_id, $movie_meta, $clean = true ) {
+		public static function save_person_meta( $post_id, $meta, $clean = true ) {
 
 			$post = get_post( $post_id );
-			if ( ! $post || 'movie' != get_post_type( $post ) )
-				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a movie.', 'wpmovielibrary-people' ) );
+			if ( ! $post || 'person' != get_post_type( $post ) )
+				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a person.', 'wpmovielibrary-people' ) );
 
 			$movie_meta = self::validate_meta( $movie_meta );
 			unset( $movie_meta['post_id'] );
 
 			foreach ( $movie_meta as $slug => $meta )
-				$update = update_post_meta( $post_id, "_wpmoly_movie_{$slug}", $meta );
+				$update = update_post_meta( $post_id, "_wpmoly_person_{$slug}", $meta );
 
 			if ( false !== $clean )
 				WPMOLY_Cache::clean_transient( 'clean', $force = true );
@@ -476,16 +475,12 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		}
 
 		/**
-		 * Filter the Movie Metadata submitted when saving a post to
+		 * Filter the Person Metadata submitted when saving a post to
 		 * avoid storing unexpected data to the database.
-		 * 
-		 * The Metabox array makes a distinction between pure metadata
-		 * and crew data, so we filter them separately. If the data slug
-		 * is valid, the value is escaped and added to the return array.
 		 * 
 		 * @since    1.0
 		 * 
-		 * @param    array    $data The Movie Metadata to filter
+		 * @param    array    $data The Person Metadata to filter
 		 * 
 		 * @return   array    The filtered Metadata
 		 */
