@@ -60,13 +60,14 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue_scripts' ), 15 );
 
 			// Bulk/quick edit
-			add_filter( 'bulk_post_updated_messages', __CLASS__ . '::people_bulk_updated_messages', 10, 2 );
+			add_filter( 'bulk_post_updated_messages', array( $this, 'people_bulk_updated_messages' ), 10, 2 );
 
 			// Metabox
 			add_filter( 'wpmoly_filter_metaboxes', array( $this, 'add_meta_box' ), 10 );
 
 			// Post edit
-			add_filter( 'post_updated_messages', __CLASS__ . '::people_updated_messages', 10, 1 );
+			add_filter( 'post_updated_messages', array( $this, 'people_updated_messages' ), 10, 1 );
+			add_action( 'save_post_people', array( $this, 'save_person' ), 10, 3 );
 		}
 
 		/** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -136,7 +137,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   array    Updated Post update messages
 		 */
-		public static function people_updated_messages( $messages ) {
+		public function people_updated_messages( $messages ) {
 
 			global $post;
 			$post_ID = $post->ID;
@@ -171,7 +172,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   array    Updated Post bulk edit messages
 		 */
-		public static function people_bulk_updated_messages( $bulk_messages, $bulk_counts ) {
+		public function people_bulk_updated_messages( $bulk_messages, $bulk_counts ) {
 
 			$new_messages = array(
 				'people' => array(
@@ -490,39 +491,9 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		private static function validate_meta( $data ) {
 
+			
+
 			return $data;
-
-			/*if ( ! is_array( $data ) || empty( $data ) || ! isset( $data['tmdb_id'] ) )
-				return $data;
-
-			$data = wpmoly_filter_empty_array( $data );
-			$data = wpmoly_filter_undimension_array( $data );
-
-			$supported = WPMOLY_Settings::get_supported_movie_meta();
-			$keys = array_keys( $supported );
-			$movie_tmdb_id = esc_attr( $data['tmdb_id'] );
-			$movie_post_id = ( isset( $data['post_id'] ) && '' != $data['post_id'] ? esc_attr( $data['post_id'] ) : null );
-			$movie_poster = ( isset( $data['poster'] ) && '' != $data['poster'] ? esc_attr( $data['poster'] ) : null );
-			$movie_meta = array();
-
-			foreach ( $data as $slug => $_meta ) {
-				if ( in_array( $slug, $keys ) ) {
-					$filter = ( isset( $supported[ $slug ]['filter'] ) && function_exists( $supported[ $slug ]['filter'] ) ? $supported[ $slug ]['filter'] : 'esc_html' );
-					$args   = ( isset( $supported[ $slug ]['filter_args'] ) && ! is_null( $supported[ $slug ]['filter_args'] ) ? $supported[ $slug ]['filter_args'] : null );
-					$movie_meta[ $slug ] = call_user_func( $filter, $_meta, $args );
-				}
-			}
-
-			$_data = array_merge(
-				array(
-					'tmdb_id' => $movie_tmdb_id,
-					'post_id' => $movie_post_id,
-					'poster'  => $movie_poster
-				),
-				$movie_meta
-			);
-
-			return $_data;*/
 		}
 
 		/**
@@ -553,7 +524,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   int|WP_Error
 		 */
-		public static function save_person( $post_ID, $post, $meta = null ) {
+		public function save_person( $post_ID, $post, $meta = null ) {
 
 			if ( ! current_user_can( 'edit_post', $post_ID ) )
 				return new WP_Error( __( 'You are not allowed to edit posts.', 'wpmovielibrary-people' ) );
@@ -563,6 +534,8 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 
 			if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE )
 				return $post_ID;
+
+			//print_r( $_POST ); die();
 
 			return $post_ID;
 		}
