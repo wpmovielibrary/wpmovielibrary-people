@@ -22,3 +22,49 @@
 	position: relative;
 	z-index: 10;
 }
+
+#wpmoly-filmography-cast table.wp-list-table.widefat,
+#wpmoly-filmography-crew table.wp-list-table.widefat {
+	clear: none;
+}
+
+#wpmoly-filmography-cast #wpmoly-filmography-cast-item-poster,
+#wpmoly-filmography-cast .wpmoly-filmography-cast-item-poster,
+#wpmoly-filmography-crew #wpmoly-filmography-cast-item-poster,
+#wpmoly-filmography-crew .wpmoly-filmography-cast-item-poster {
+	text-align: center;
+	width: 3em;
+}
+
+#wpmoly-filmography-cast .wpmoly-filmography-cast-item-poster-container, 
+#wpmoly-filmography-crew .wpmoly-filmography-cast-item-poster-container {
+	height: 3em;
+	overflow: hidden;
+	width: 3em;
+}
+
+#wpmoly-filmography-cast .wpmoly-filmography-cast-item-poster-container img,
+#wpmoly-filmography-crew .wpmoly-filmography-cast-item-poster-container img {
+	height: auto;
+	width: 100%;
+}
+
+#wpmoly-filmography-cast .wpmoly-filmography-cast-item-poster-container img.thumb,
+#wpmoly-filmography-crew .wpmoly-filmography-cast-item-poster-container img.thumb {
+	margin-top: -25%;
+}
+
+#wpmoly-filmography-cast #wpmoly-filmography-cast-item-character,
+#wpmoly-filmography-cast .wpmoly-filmography-cast-item-character,
+#wpmoly-filmography-crew #wpmoly-filmography-cast-item-character,
+#wpmoly-filmography-crew .wpmoly-filmography-cast-item-character {
+	text-align: right;
+}
+
+#wpmoly-filmography-cast #wpmoly-filmography-cast-item-date,
+#wpmoly-filmography-cast .wpmoly-filmography-cast-item-date,
+#wpmoly-filmography-crew #wpmoly-filmography-cast-item-date,
+#wpmoly-filmography-crew .wpmoly-filmography-cast-item-date {
+	text-align: center;
+	width: 4em;
+}

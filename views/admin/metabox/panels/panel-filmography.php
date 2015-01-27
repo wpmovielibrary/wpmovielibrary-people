@@ -3,25 +3,66 @@
 
 			<div id="wpmoly-filmography-cast" class="wpmoly-filmography-cast">
 				<h3><?php _e( 'Cast', 'wpmovielibrary-people' ) ?></h3>
-				<div id="wpmoly-filmography-cast-list">
+				<div>
+					<table class="wp-list-table widefat fixed posts">
+						<thead>
+							<tr>
+								<th scope="col" id="wpmoly-filmography-cast-item-poster" class="manage-column"><span class="wpmolicon icon-poster" title="<?php _e( 'Poster', 'wpmovielibrary' ) ?>"></span></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-title" class="manage-column"><?php _e( 'Title' ) ?></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-character" class="manage-column"><?php _e( 'Character', 'wpmovielibrary-people' ) ?></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-date" class="manage-column"><span class="wpmolicon icon-date" title="<?php _e( 'Release Date', 'wpmovielibrary' ) ?>"></span></th>
+							</tr>
+						</thead>
+
+						<tbody id="wpmoly-filmography-cast-list">
+<?php
+if ( ! empty( $cast ) ) :
+	$i = 0;
+	foreach ( $cast as $role ) :
+		$role['date'] = date( 'Y', strtotime( $role['release_date'] ) );
+		if ( '' == $role['character'] )
+			$role['character'] = __( 'Unknown' );
+
+		if ( isset( $role['post'] ) ) {
+			$poster = wp_get_attachment_image_src( get_post_thumbnail_id( $role['post']->ID ), 'thumbnail' );
+			$poster = $poster[0];
+			$poster_size = '';
+			$title  = sprintf( '<a href="%s" title="%s">%s</a>', get_permalink( $role['post']->ID ), $role['original_title'], $role['post']->post_title );
+		} else {
+			$poster = $url . $role['poster_path'];
+			$poster_size = 'thumb';
+			$title  = sprintf( '<span title="%s">%s</span>', $role['original_title'], $role['title'] );
+		}
+?>
+							<tr id="post-<?php echo $role['id'] ?>" class="post-<?php echo $role['id'] ?> type-movie status-publish hentry<?php if ( $i % 2 ) echo ' alternate' ?> iedit author-self level-0">
+								<th scope="col" id="wpmoly-filmography-cast-item-<?php echo $role['id'] ?>-poster" class="manage-column wpmoly-filmography-cast-item-poster"><div class="wpmoly-filmography-cast-item-poster-container"><img class="<?php echo $poster_size ?>" src="<?php echo $poster ?>" alt="" /></div></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-<?php echo $role['id'] ?>-title" class="manage-column wpmoly-filmography-cast-item-title"><?php echo $title ?></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-<?php echo $role['id'] ?>-character" class="manage-column wpmoly-filmography-cast-item-character"><?php echo __( 'as' ) . ' ' . $role['character'] ?></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-<?php echo $role['id'] ?>-date" class="manage-column wpmoly-filmography-cast-item-date"><span title="<?php echo $role['release_date'] ?>"><?php echo $role['date'] ?></span></th>
+							</tr>
+
+<?php
+		$i++;
+	endforeach;
+endif;
+?>
+						</tbody>
+					</table>
 				</div>
 			</div>
 
 			<div id="wpmoly-filmography-crew" class="wpmoly-filmography-crew">
 				<h3><?php _e( 'Crew', 'wpmovielibrary-people' ) ?></h3>
 				<div id="wpmoly-filmography-crew-list">
-				</div>
-			</div>
-
-<?php /*foreach ( $details as $slug => $detail ) :
-	$slug = str_replace( 'movie_', '', $slug );
+<?php
+if ( ! empty( $crew ) ) :
+	foreach ( $crew as $job ) :
 ?>
-			<div id="wpmoly-details-<?php echo $slug ?>" class="wpmoly-details-item wpmoly-details-<?php echo $slug ?>">
-				<h4 class="wpmoly-details-item-title"><span class="<?php echo $detail['icon'] ?>"></span>&nbsp; <?php echo $detail['title'] ?></h4>
-				<div class="redux-field-init redux-field-container redux-field redux-container-select">
-					<?php echo $detail['html'] ?>
+					
+<?php
+	endforeach;
+endif;
+?>
 				</div>
 			</div>
-
-<?php endforeach;*/ ?>
 		</div>

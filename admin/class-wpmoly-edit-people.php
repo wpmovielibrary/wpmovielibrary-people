@@ -16,7 +16,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		/**
 		 * People Metadata
 		 *
-		 * @since    2.1.4
+		 * @since    1.0
 		 * @var      array
 		 */
 		protected $metadata = array();
@@ -124,18 +124,25 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 */
 		public static function footer_scripts() {
 
+			$url = WPMOLY_TMDb::get_image_url( null, 'poster' );
+			$url = $url['xx-small'];
 ?>
 		<script type="text/template" id="wpmoly-filmography-cast-template">
-								<% _.each( movies, function( movie ) { %>
-									<div>
-										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][tmdb_id]" value="<%= movie.id %>" /><span><%= movie.id %></span> - 
-										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][title]" value="<%= movie.title %>" /><span><%= movie.title %></span> - 
-										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][original_title]" value="<%= movie.original_title %>" /><span><%= movie.original_title %></span> - 
-										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][character]" value="<%= movie.character %>" /><span><%= movie.character %></span> - 
-										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][job]" value="<%= movie.job %>" /><span><%= movie.job %></span> - 
-										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][poster_path]" value="<%= movie.poster_path %>" /><span><%= movie.poster_path %></span> - 
-										<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][release_date]" value="<%= movie.release_date %>" /><span><%= movie.release_date %></span>
-									</div>
+								<% var url = '<?php echo $url ?>'; _.each( movies, function( movie, i ) { %>
+							<tr id="post-<%= movie.id %>" class="post-<%= movie.id %> type-movie status-publish hentry<% if ( i % 2 ) { %> alternate<% } %> iedit author-self level-0">
+								<th scope="col" id="wpmoly-filmography-cast-item-<%= movie.id %>-poster" class="manage-column wpmoly-filmography-cast-item-poster"><div class="wpmoly-filmography-cast-item-poster-container"><img class="" src="<%= url + movie.poster_path %>" alt="" /></div></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-<%= movie.id %>-title" class="manage-column wpmoly-filmography-cast-item-title"><span title="<%= movie.original_title %>"><%= movie.title %></span></th>
+								<th scope="col" id="wpmoly-filmography-cast-item-<%= movie.id %>-character" class="manage-column wpmoly-filmography-cast-item-character"><?php echo __( 'as' ) . ' ' ?><% if ( '' == movie.character ) { %><?php _e( 'Unknown', 'wpmovielibrary-people' ) ?><% } else { %><%= movie.character %><% } %> </th>
+								<th scope="col" id="wpmoly-filmography-cast-item-<%= movie.id %>-date" class="manage-column wpmoly-filmography-cast-item-date"><span title="<%= movie.release_date %>"><%= new Date( movie.release_date ).getFullYear() %></span></th>
+								<th style="display:none">
+									<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][tmdb_id]" value="<%= movie.id %>" />
+									<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][title]" value="<%= movie.title %>" />
+									<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][original_title]" value="<%= movie.original_title %>" />
+									<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][character]" value="<%= movie.character %>" />
+									<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][poster_path]" value="<%= movie.poster_path %>" />
+									<input type="hidden" name="wpmoly[credits][cast][<%= movie.id %>][release_date]" value="<%= movie.release_date %>" />
+								</th>
+							</tr>
 
 								<% }); %>
 		</script>
@@ -159,7 +166,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		/**
 		 * Add message support for movies in Post Editor.
 		 * 
-		 * @since    2.1.4
+		 * @since    1.0
 		 * 
 		 * @param    array    $messages Default Post update messages
 		 * 
@@ -193,7 +200,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		/**
 		 * Add message support for person in Post Editor bulk edit.
 		 * 
-		 * @since    2.1.4
+		 * @since    1.0
 		 * 
 		 * @param    array    $messages Default Post bulk edit messages
 		 * 
@@ -266,7 +273,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 								'filmography' => array(
 									'title'    => __( 'Filmography', 'wpmovielibrary' ),
 									'icon'     => 'wpmolicon icon-list',
-									'callback' => 'WPMOLY_Edit_People::render_filmography_panel'
+									'callback' => array( $this, 'render_filmography_panel' )
 								),
 
 								'images' => array(
@@ -340,7 +347,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * Display a Metabox panel to preview metadata.
 		 * 
-		 * @since    2.0
+		 * @since    1.0
 		 * 
 		 * @param    int    Current Post ID
 		 * 
@@ -374,7 +381,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * Display a Metabox panel to download movie metadata.
 		 * 
-		 * @since    2.0
+		 * @since    1.0
 		 * 
 		 * @param    int    Current Post ID
 		 * 
@@ -408,9 +415,15 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * @return   string    Panel HTML Markup
 		 */
-		private static function render_filmography_panel( $post_id ) {
+		private function render_filmography_panel( $post_id ) {
 
-			$attributes = array();
+			$url = WPMOLY_TMDb::get_image_url( null, 'poster' );
+			$url = $url['xx-small'];
+
+			$filmography = WPMOLYP_People::get_person_filmography( $post_id );
+			extract( $filmography );
+
+			$attributes = compact( 'url', 'cast', 'crew' );
 
 			$panel = self::render_admin_template( 'metabox/panels/panel-filmography.php', $attributes );
 
@@ -422,7 +435,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * Display a Metabox panel to download movie images.
 		 * 
-		 * @since    2.0
+		 * @since    1.0
 		 * 
 		 * @param    int    Current Post ID
 		 * 
@@ -445,7 +458,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		 * 
 		 * Display a Metabox panel to download movie posters.
 		 * 
-		 * @since    2.0
+		 * @since    1.0
 		 * 
 		 * @param    int    Current Post ID
 		 * 
@@ -472,10 +485,11 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		/**
 		 * Save person metadata.
 		 * 
-		 * @since    1.3
+		 * @since    1.0
 		 * 
-		 * @param    int      $post_id ID of the current Post
-		 * @param    array    $meta Person meta
+		 * @param    int        $post_id ID of the current Post
+		 * @param    array      $meta Person meta
+		 * @param    boolean    $clean Clean cache or not
 		 * 
 		 * @return   int|object    WP_Error object is anything went wrong, true else
 		 */
@@ -495,14 +509,31 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			return $post_id;
 		}
 
-		protected function save_person_filmography( $post_id, $credits ) {
+		/**
+		 * Save a person's complete filmography.
+		 * 
+		 * @since    1.0
+		 * 
+		 * @param    int        $post_id ID of the current Post
+		 * @param    array      $meta Person meta
+		 * @param    boolean    $clean Clean cache or not
+		 * 
+		 * @return   int|object    WP_Error object is anything went wrong, true else
+		 */
+		protected function save_person_filmography( $post_id, $credits, $clean = true ) {
 
 			$post = get_post( $post_id );
 			if ( ! $post || 'person' != get_post_type( $post ) )
 				return new WP_Error( 'invalid_post', __( 'Error: submitted post is not a person.', 'wpmovielibrary-people' ) );
 
 			$credits = $this->validate_credits( $credits );
-			print_r( $credits ); die();
+
+			$update = update_post_meta( $post_id, '_wpmoly_person_filmography', $credits );
+
+			if ( false !== $clean )
+				WPMOLY_Cache::clean_transient( 'clean', $force = true );
+
+			return $credits;
 		}
 
 		/**
@@ -530,6 +561,16 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			return $data;
 		}
 
+		/**
+		 * Filter the Person's Credits submitted when saving a post to
+		 * avoid storing unexpected data to the database.
+		 * 
+		 * @since    1.0
+		 * 
+		 * @param    array    $credits The Person Credits to filter
+		 * 
+		 * @return   array    The filtered Credits
+		 */
 		private function validate_credits( $credits ) {
 
 			$defaults = array(
@@ -538,14 +579,18 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			);
 			$credits = wp_parse_args( $credits, $defaults );
 
-			$default_cast = array_flip( array( 'adult', 'character', 'credit_id', 'id', 'original_title', 'poster_path', 'release_date', 'title' ) );
-			$default_crew = array_flip( array( 'adult', 'credit_id', 'department', 'id', 'job', 'original_title', 'poster_path', 'release_date', 'title' ) );
+			$default_cast = array_flip( array( 'adult', 'character', 'credit_id', 'tmdb_id', 'original_title', 'poster_path', 'release_date', 'title' ) );
+			$default_crew = array_flip( array( 'adult', 'credit_id', 'department', 'tmdb_id', 'job', 'original_title', 'poster_path', 'release_date', 'title' ) );
 
 			if ( isset( $credits['cast'] ) && ! empty( $credits['cast'] ) ) {
+
 				foreach ( $credits['cast'] as $i => $credit ) {
 					$_credit = array_intersect_key( $credit, $default_cast );
 					$credits['cast'][ $i ] = array_map( 'esc_html', $_credit );
 				}
+
+				usort( $credits['cast'], 'WPMOLY_Utils::order_by_date' );
+				$credits['cast'] = array_reverse( $credits['cast'] );
 			}
 
 			if ( isset( $credits['crew'] ) && ! empty( $credits['crew'] ) ) {
@@ -553,6 +598,9 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 					$_credit = array_intersect_key( $credit, $default_crew );
 					$credits['crew'][ $i ] = array_map( 'esc_html', $_credit );
 				}
+
+				usort( $credits['crew'], 'WPMOLY_Utils::order_by_date' );
+				$credits['crew'] = array_reverse( $credits['crew'] );
 			}
 
 			return $credits;
@@ -561,7 +609,7 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 		/**
 		 * Remove person meta.
 		 * 
-		 * @since    1.2
+		 * @since    1.0
 		 * 
 		 * @param    int      $post_id ID of the current Post
 		 * 
@@ -594,8 +642,6 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 
 			if ( defined('DOING_AUTOSAVE') && DOING_AUTOSAVE )
 				return $post_id;
-
-			print_r( $_POST['wpmoly'] ); die();
 
 			if ( isset( $_POST['wpmoly']['credits'] ) ) {
 				$credits = $_POST['wpmoly']['credits'];

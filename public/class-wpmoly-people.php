@@ -168,6 +168,11 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 					$value[ $meta ] = get_post_meta( $post_id, "_wpmoly_person_{$meta}", true );
 
 				return $value;
+
+			} elseif ( 'filmography' ) {
+
+				$value = get_post_meta( $post_id, '_wpmoly_person_filmography', true );
+				return $value;
 			}
 
 			if ( ! in_array( $meta, array_keys( $wpmolyp->metadata ) ) )
@@ -176,6 +181,54 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 			$value = get_post_meta( $post_id, "_wpmoly_person_{$meta}", true );
 
 			return $value;
+		}
+
+		/**
+		 * Return a specific person's filmography.
+		 *
+		 * @since    1.0
+		 * 
+		 * @param    int    $post_id Person Post ID
+		 *
+		 * @return   array    Filmography
+		 */
+		public static function get_person_filmography( $id ) {
+
+			$credits = self::get_person_meta( $id, 'filmography' );
+
+			$credits['cast'] = self::filter_filmography( $credits['cast'] );
+			//$credits['crew'] = self::filter_filmography( $credits['crew'] );
+
+			return $credits;
+		}
+
+		/**
+		 * Filter a person's filmography to match already imported movies.
+		 *
+		 * @since    1.0
+		 * 
+		 * @param    int    $filmography Movies list
+		 *
+		 * @return   array    Updated list
+		 */
+		public static function filter_filmography( $filmography ) {
+
+			$movies = array();
+			foreach ( $filmography as $i => $movie ) {
+
+				$movies = get_posts( 
+					array(
+						'post_type' => 'movie',
+						'meta_key'  => '_wpmoly_movie_tmdb_id',
+						'meta_value' => $movie['tmdb_id']
+					)
+				);
+
+				if ( 1 == count( $movies ) )
+					$filmography[ $i ]['post'] = $movies[0];
+			}
+
+			return $filmography;
 		}
 
 		/**
