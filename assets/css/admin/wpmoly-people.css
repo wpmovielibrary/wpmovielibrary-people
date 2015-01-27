@@ -23,21 +23,21 @@
 	z-index: 10;
 }
 
-#wpmoly-filmography-cast-container,
+/*#wpmoly-filmography-cast-container,
 #wpmoly-filmography-crew-container {
 	box-shadow: -4px 1px 4px #aaa inset;
 	max-height: 24em;
 	overflow-x: hidden;
 	overflow-y: scroll;
-}
+}*/
 
 #wpmoly-filmography-cast table.wp-list-table.widefat,
 #wpmoly-filmography-crew table.wp-list-table.widefat {
-	background: transparent;
+	/*background: transparent;*/
 	clear: none;
 }
 
-#wpmoly-filmography-cast table.wp-list-table.widefat thead,
+/*#wpmoly-filmography-cast table.wp-list-table.widefat thead,
 #wpmoly-filmography-crew table.wp-list-table.widefat thead {
 	background: #fff;
 }
@@ -51,7 +51,7 @@
 #wpmoly-filmography-crew table.wp-list-table.widefat .alternate {
 	background: transparent;
 	box-shadow: 0 -1px 0 #eee;
-}
+}*/
 
 #wpmoly-filmography-cast #wpmoly-filmography-cast-item-poster,
 #wpmoly-filmography-cast .wpmoly-filmography-cast-item-poster,
