@@ -20,6 +20,12 @@ window.wpmoly = window.wpmoly || {};
 			tmpl: '#wpmoly-filmography-cast-template',
 			collection: editor.models.cast
 		});
+
+		editor.views.crew = new wpmoly.editor.View.Movies({
+			el: '#wpmoly-filmography-crew-list',
+			tmpl: '#wpmoly-filmography-crew-template',
+			collection: editor.models.crew
+		});
 	};
 
 	/**

@@ -7,9 +7,13 @@ window.wpmoly = window.wpmoly || {};
 
 	var person = function() {
 
+		var cast = $.parseJSON( $( '#wpmoly-filmography-cast-data' ).val() ),
+		    crew = $.parseJSON( $( '#wpmoly-filmography-crew-data' ).val() );
+
 		editor.models.person = new wpmoly.editor.Model.Person();
 		editor.models.search = new wpmoly.editor.Model.Search();
-		editor.models.cast = new wpmoly.editor.Model.Movies();
+		editor.models.cast = new wpmoly.editor.Model.Movies( cast );
+		editor.models.crew = new wpmoly.editor.Model.Movies( crew );
 	};
 
 	/**
@@ -118,6 +122,11 @@ window.wpmoly = window.wpmoly || {};
 						if ( undefined != response.credits.cast ) {
 							editor.models.cast.reset();
 							editor.models.cast.add( response.credits.cast );
+						}
+
+						if ( undefined != response.credits.crew ) {
+							editor.models.crew.reset();
+							editor.models.crew.add( response.credits.crew );
 						}
 
 						editor.models.status.trigger( 'status:say', wpmoly_lang.done );

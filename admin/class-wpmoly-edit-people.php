@@ -146,6 +146,25 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 
 								<% }); %>
 		</script>
+		<script type="text/template" id="wpmoly-filmography-crew-template">
+								<% var url = '<?php echo $url ?>'; _.each( movies, function( movie, i ) { %>
+							<tr id="post-<%= movie.id %>" class="post-<%= movie.id %> type-movie status-publish hentry<% if ( i % 2 ) { %> alternate<% } %> iedit author-self level-0">
+								<th scope="col" id="wpmoly-filmography-crew-item-<%= movie.id %>-poster" class="manage-column wpmoly-filmography-crew-item-poster"><div class="wpmoly-filmography-crew-item-poster-container"><img class="" src="<%= url + movie.poster_path %>" alt="" /></div></th>
+								<th scope="col" id="wpmoly-filmography-crew-item-<%= movie.id %>-title" class="manage-column wpmoly-filmography-crew-item-title"><span title="<%= movie.original_title %>"><%= movie.title %></span></th>
+								<th scope="col" id="wpmoly-filmography-crew-item-<%= movie.id %>-job" class="manage-column wpmoly-filmography-crew-item-job"><% if ( '' == movie.job ) { %><?php _e( 'Unknown', 'wpmovielibrary-people' ) ?><% } else { %><%= movie.job %><% } %> </th>
+								<th scope="col" id="wpmoly-filmography-crew-item-<%= movie.id %>-date" class="manage-column wpmoly-filmography-crew-item-date"><span title="<%= movie.release_date %>"><%= new Date( movie.release_date ).getFullYear() %></span></th>
+								<th style="display:none">
+									<input type="hidden" name="wpmoly[credits][crew][<%= movie.id %>][tmdb_id]" value="<%= movie.id %>" />
+									<input type="hidden" name="wpmoly[credits][crew][<%= movie.id %>][title]" value="<%= movie.title %>" />
+									<input type="hidden" name="wpmoly[credits][crew][<%= movie.id %>][original_title]" value="<%= movie.original_title %>" />
+									<input type="hidden" name="wpmoly[credits][crew][<%= movie.id %>][job]" value="<%= movie.job %>" />
+									<input type="hidden" name="wpmoly[credits][crew][<%= movie.id %>][poster_path]" value="<%= movie.poster_path %>" />
+									<input type="hidden" name="wpmoly[credits][crew][<%= movie.id %>][release_date]" value="<%= movie.release_date %>" />
+								</th>
+							</tr>
+
+								<% }); %>
+		</script>
 <?php
 		}
 
@@ -322,7 +341,6 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 					continue;
 
 				$is_active = ( ( 'preview' == $id && ! $empty ) || ( 'meta' == $id && $empty ) );
-				//$is_active = ( 'meta' == $id );
 				$tabs[ $id ] = array(
 					'title'  => $panel['title'],
 					'icon'   => $panel['icon'],
@@ -423,7 +441,12 @@ if ( ! class_exists( 'WPMOLY_Edit_People' ) ) :
 			$filmography = WPMOLYP_People::get_person_filmography( $post_id );
 			extract( $filmography );
 
-			$attributes = compact( 'url', 'cast', 'crew' );
+			$json = array(
+				'cast' => json_encode( $cast ),
+				'crew' => json_encode( $crew )
+			);
+
+			$attributes = compact( 'url', 'cast', 'crew', 'json' );
 
 			$panel = self::render_admin_template( 'metabox/panels/panel-filmography.php', $attributes );
 

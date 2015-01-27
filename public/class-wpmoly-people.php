@@ -197,7 +197,7 @@ if ( ! class_exists( 'WPMOLYP_People' ) ) :
 			$credits = self::get_person_meta( $id, 'filmography' );
 
 			$credits['cast'] = self::filter_filmography( $credits['cast'] );
-			//$credits['crew'] = self::filter_filmography( $credits['crew'] );
+			$credits['crew'] = self::filter_filmography( $credits['crew'] );
 
 			return $credits;
 		}
